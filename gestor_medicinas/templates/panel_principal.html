@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/panel_principal.css' %}">
+    <title>{% block title %}Panel principal{% endblock %}</title>
+{% endblock %}
+
+{% block body %}
+<main class="noshow">
+
+    <div class="cont_form_filtros">
+        <form method="get" action="" class="formulario_filtros">
+            <input type="text" name="filtro_desc_medicina" placeholder="Buscar medicina..." value="{{ filtro_desc_medicina }}" class="campo">
+        
+            <select name="filtro_almacen" class="campo">
+                <option value="">Todos los almacenes</option>
+                {% for almacen in almacenes_activos %}
+                    <option value="{{ almacen.id_almacen }}" {% if filtro_almacen_id|stringformat:'s' == almacen.id_almacen|stringformat:'s' %}selected{% endif %}>
+                        {{ almacen.desc_almacen }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" class="boton_filtro">Filtrar</button>
+        </form>
+    </div>
+
+    <div style="display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap: nowrap;">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&filtro_desc_medicina={{ filtro_desc_medicina }}&filtro_almacen={{ filtro_almacen_id }}" 
+                class="btn_paginacion">&lt;</a>
+        {% else %}
+            <span class="btn_paginacion_disabled">&lt;</span>
+        {% endif %}
+
+        <div class="panel">
+            {% for medicina in page_obj %}
+            <div class="medicina" style="border:1px solid #ccc; padding:10px; width:300px; box-sizing:border-box;">
+                <div class="cont_imagen_medicina" style="text-align:center; margin-bottom:10px;">
+                    {% if not medicina.imagen_medicina %}
+                        <p class="texto_sin_img">Sin imagen</p>
+                    {% else %}
+                        {% if not medicina.imagen_existe %}
+                            <p class="texto_img_perdida">Imagen perdida</p>
+                        {% else %}
+                            <img src="{{ medicina.imagen_medicina.url }}" alt="imagen medicina" class="imagen_medicina"/>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <div class="info_medicina">
+                    <p class="desc_medicina"><span class="span_desc_medicina">Medicina:</span> {{ medicina.desc_medicina }}</p>
+                    <p class="desc_medicina">
+                        <span class="span_desc_medicina">Almacén:</span>
+                        {% if medicina.almacen_perteneciente %}
+                            {{ medicina.almacen_perteneciente.desc_almacen }}
+                        {% else %}
+                            Sin almacén
+                        {% endif %}
+                    </p>
+                    <p class="desc_medicina">
+                        <span class="span_desc_medicina">Cantidad:</span>
+                         {{ medicina.cantidad }} ({{ medicina.medida_medicina.desc_medida }})
+                    </p>
+
+                    <div class="caja_acciones" style="display:flex; gap:10px;">
+                        <button type="button" class="btn_sumar" 
+                            data-id="{{ medicina.id_medicina }}" 
+                            data-desc="{{ medicina.desc_medicina }}" 
+                            data-cantidad="{{ medicina.cantidad }}">+</button>
+
+                        <button type="button" class="btn_restar" 
+                            data-id="{{ medicina.id_medicina }}" 
+                            data-desc="{{ medicina.desc_medicina }}" 
+                            data-cantidad="{{ medicina.cantidad }}">-</button>
+
+                        <a href="{% url 'edicion_medicina' medicina.id_medicina %}?page={{ request.GET.page }}&filtro_desc_medicina={{ request.GET.filtro_desc_medicina|urlencode }}&filtro_almacen={{ request.GET.filtro_almacen|urlencode }}" class="btn_editar">
+                            Editar
+                        </a>
+
+                        <button type="button" class="btn_borrar"
+                            data-id="{{ medicina.id_medicina }}"
+                            data-desc="{{ medicina.desc_medicina }}">
+                            Borrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+                <p class="texto_sin_medicinas">No hay medicinas que mostrar.</p>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&filtro_desc_medicina={{ filtro_desc_medicina }}&filtro_almacen={{ filtro_almacen_id }}" 
+            class="btn_paginacion">&gt;</a>
+        {% else %}
+            <span class="btn_paginacion_disabled">&gt;</span>
+        {% endif %}
+    </div>
+
+    <div id="overlay_suma" class="form_overlay" style="display:none;">
+        <div class="form_popup">
+            <form id="form_suma" method="post" action="">
+                {% csrf_token %}
+                <p id="texto_suma"></p>
+
+                <label for="cantidad_actual_suma">Cantidad actual: </label><br>
+                <p id="cantidad_actual_suma" class="text_cantidad"></p>
+
+                <input type="number" step="0.01" name="suma" id="input_suma" max="50000" min="0.01" required placeholder="Cantidad a sumar" class="campo_form_emergente1">
+                <div>
+                    <button type="submit" class="btn_form_emergente1">Guardar</button>
+                    <button type="button" onclick="cerrarOverlay('overlay_suma')" class="btn_form_emergente2">Volver</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="overlay_resta" class="form_overlay">
+        <div class="form_popup">
+            <form id="form_resta" method="post" action="">
+                {% csrf_token %}
+                <p id="texto_resta"></p>
+
+                <label for="cantidad_actual_resta">Cantidad actual:</label><br>
+                <p id="cantidad_actual_resta" class="text_cantidad"></p>
+
+                <input type="number" step="0.01" name="resta" id="input_resta" max="" min="0.01" required placeholder="Cantidad a restar" class="campo_form_emergente1">
+                
+                <div>
+                    <button type="submit" class="btn_form_emergente1">Guardar</button>
+                    <button type="button" onclick="cerrarOverlay('overlay_resta')" class="btn_form_emergente2">Volver</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="overlay_borrar" class="form_overlay" style="display:none;">
+        <div class="form_popup">
+            <form id="form_borrar" method="post" action="">
+                {% csrf_token %}
+                <p id="texto_borrar"></p>
+                <div>
+                    <button type="submit" class="btn_form_emergente1">Sí, borrar</button>
+                    <button type="button" onclick="cerrarOverlay('overlay_borrar')" class="btn_form_emergente2">No, cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script src="../static/js/emergentes.js"></script>
+{% endblock %}

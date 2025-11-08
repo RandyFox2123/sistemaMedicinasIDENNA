@@ -1,0 +1,46 @@
+
+.titulo{
+    font-size: 25px;
+    color: rgba(6, 36, 71, 0.911);
+    font-weight: bold;
+    font-style: italic;
+}
+
+.contendor_principal{
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 60%;
+    height: auto;
+    padding: 40px;
+    border-radius: 520px;
+    background-color: rgba(219, 238, 255, 0.89);
+    border: 3px solid rgb(78, 176, 189);
+    justify-content: center;
+    align-items: center;
+
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.logo_idena{
+    width: 60%;
+    height: auto;
+}
+
+.btn_acceso{
+    cursor: pointer;
+    text-align: center;
+    width: 30%;
+    padding: 10px;
+    border-radius: 15px;
+    border: 1.5px groove rgb(0, 217, 255);
+}
+.btn_acceso:hover{
+    background-color: rgb(28, 200, 223);
+    border: 1.5px groove rgb(69, 249, 255);
+    color: white;
+    transition-duration: 0.4s;
+    box-shadow: 0px 0px 50px 2px rgb(69, 212, 255);
+}

@@ -1,0 +1,125 @@
+
+/*===> Estilos generales para todos los elementos*/
+
+
+@font-face {
+    font-family: 'SchibstedGrotesk';
+    src: url('../fonts/SchibstedGrotesk-Italic-VariableFont_wght.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+*{
+    box-sizing: border-box;
+    font-family: 'Bahnschrift', 'Calibri', 'Arial Narrow' ;
+    color: rgb(8, 66, 68);
+    font-family:'SchibstedGrotesk' ;
+}
+
+a{
+    text-decoration: none;
+}
+
+
+.cabecera{
+    background-color: rgba(4, 37, 43, 0.692);
+    margin: 0px 0px 15px 0px;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
+.cont_info1{
+    display: flex;
+    flex-direction: row;
+    flex-direction: wrap;
+    width: 50%;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo_idena{
+    width: 20%;
+    height: 70px;
+    margin-right: 15px;
+}
+.titulo{
+    font-size: 25px;
+    font-style: italic;
+    font-weight: ;
+    color: rgb(177, 220, 255);
+}
+
+.navegacion_links{
+    width: 40%;
+    padding: 4px;
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+    justify-content: center;
+    align-items: center;
+}
+
+.link{
+    font-size: 18px;
+    font-style: italic;
+    padding: 5px;
+    color: rgb(177, 220, 255);
+    
+}
+.link:hover{
+    color: rgb(224, 255, 250);
+    transition-duration: 0.4s;
+    background-color: rgba(181, 255, 255, 0.219);
+    border-radius: 20px;
+}
+
+
+/*Estilos del cuerpo de la web*/
+body{
+    background-image: url(/static/img/fondo.webp);
+    background-color: white;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-attachment: fixed;
+    margin: 0px;
+}
+
+
+/*Este se usa para el boton de imagen*/
+.custom-file-upload {
+    padding: 8px 10px;
+    border-radius: 4px;
+    color: #333;
+    border: 2px solid rgb(224, 113, 9);
+    background-color: orange;
+    width: auto;
+    display: inline-block;
+    margin-bottom: 0px;
+  }
+
+.custom-file-upload:hover {
+    background-color: rgb(255, 115, 0);
+    border: 2px solid rgb(252, 164, 82);
+}
+
+.custom-file-upload label{
+    cursor: pointer;
+}
+
+#fotoInput {
+    display: none;
+}
+
+
+/*Este es para los botones de borrar, el formulario que los contiene que envia por POST*/
+.form_borrar{
+    display: inline;
+    margin: 0px;
+    z-index: -1;
+}
+

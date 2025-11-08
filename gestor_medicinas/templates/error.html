@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es-ve">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/error.css' %}">
+    {% block head %}
+    <title>{% block title %}ERROR OBTENIDO{%endblock%}</title>  
+    {% endblock %}
+</head>
+
+
+<body>
+    {% block body %}
+    <div class="carta_error">
+        <img src="{% static 'img/error.webp' %}" alt="Imagen de error" class="imagen_error">
+        <h1 class="titulo_error">¡ Hubo un inconveniente !</h1>
+        <p class="texto_informativo">{{error_obtenido}}</p>
+        <p class="texto_informativo">intenta regresar a la pagina anterior y verifica que no estes haciendo algo mal o tambien puedes volver al panel principal.</p> 
+
+        <a href="{% url 'panel_principal' %}" class="btn_regreso">Ir al panel</a>
+    </div>
+    {% endblock %}
+</body>
+</html>
+

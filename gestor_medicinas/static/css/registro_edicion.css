@@ -1,0 +1,144 @@
+
+
+.imagen_juguete{
+    width: 100%;
+    max-width:100%; 
+    max-height:300px;
+    height: 300px;
+    border-radius: 20px;
+}
+
+.titulo{
+    margin: 4px;
+}
+
+.text_sin_imagen{
+    color:rgb(105, 129, 129);
+    margin: 0px;
+}
+
+.form{
+    background-color: rgba(233, 248, 255, 0.918);
+    border-radius: 10px;
+    border: 2px solid rgb(130, 168, 202);
+    width: 35%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.contenedor_campo_img{
+    padding: 5px;
+    width: 95%;
+    text-align: left;
+    border-radius: 10px;
+    border: 1.5px solid rgb(170, 179, 182);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; 
+}
+
+.contenedor_campo{
+    padding: 10px;
+    width: 95%;
+    text-align: left;
+    border-radius: 10px;
+    border: 1.5px solid rgb(170, 179, 182);
+    display: flex;
+    flex-direction: column;
+}
+
+.campo{
+    border: 2px solid rgb(169, 198, 224);
+    padding: 5px;
+    border-radius: 10px;
+}
+.campo:focus{
+    border: 2px solid rgb(76, 149, 151);
+    background-color: rgb(191, 236, 227);
+    outline: none;
+    color:rgb(22, 91, 94) ;
+    transition-duration: 0.6s;
+}
+
+.imagen_medicina{
+    background-color: rgb(169, 250, 253);
+    border: 2px solid rgb(76, 149, 151);
+    padding: 4px;
+}
+
+.boton_imagen{
+    background-color: red;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+
+
+
+/* Estilo para el botón personalizado */
+input[type="file"] {
+    display: none;
+}
+.custom-file-upload{
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+    background-color: #a7eed9;
+    border: 2px solid #449288;
+    
+    color: rgb(19, 99, 88);
+    border-radius: 10px;
+    font-size: 14px;
+}
+.custom-file-upload:hover{
+    background-color: #2e808f;
+    border: 2px solid #50c0b7;
+    color: whitesmoke;
+    transition-duration: 0.6s;
+}
+
+.caja_botones{
+    width: 95%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+.boton_crear{
+    background-color: rgb(90, 241, 30);
+    color: rgb(238, 255, 241);
+    padding: 5px;
+    border-radius: 8px;
+    border: 2px solid rgb(70, 209, 70);
+    cursor: pointer;
+}
+.boton_crear:hover{
+    background-color: rgb(64, 190, 14);
+    border: 2px solid rgb(26, 223, 26);
+    transition-duration: 0.4s;
+}
+.boton_volver{
+    background-color: rgb(241, 30, 93);
+    color: rgb(238, 255, 241);
+    padding: 5px;
+    border-radius: 8px;
+    border: 2px solid rgb(209, 70, 105);
+    cursor: pointer;
+}
+.boton_volver:hover{
+    background-color: rgb(212, 8, 104);
+    border: 2px solid rgb(192, 23, 66);
+    transition-duration: 0.4s;
+}
+
