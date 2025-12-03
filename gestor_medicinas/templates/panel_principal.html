@@ -12,12 +12,12 @@
     <div class="cont_form_filtros">
         <form method="get" action="" class="formulario_filtros">
             <input type="text" name="filtro_desc_medicina" placeholder="Buscar medicina..." value="{{ filtro_desc_medicina }}" class="campo">
-        
-            <select name="filtro_almacen" class="campo">
-                <option value="">Todos los almacenes</option>
-                {% for almacen in almacenes_activos %}
-                    <option value="{{ almacen.id_almacen }}" {% if filtro_almacen_id|stringformat:'s' == almacen.id_almacen|stringformat:'s' %}selected{% endif %}>
-                        {{ almacen.desc_almacen }}
+            
+            <select name="filtro_ubicacion" class="campo">
+                <option value="">Todas las ubicaciones</option>
+                {% for ubicacion in ubicaciones_activas %}
+                    <option value="{{ ubicacion.id }}" {% if filtro_ubicacion_id|stringformat:'s' == ubicacion.id|stringformat:'s' %}selected{% endif %}>
+                        {{ ubicacion.desc_ubicacion }}
                     </option>
                 {% endfor %}
             </select>
@@ -28,7 +28,7 @@
 
     <div style="display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap: nowrap;">
         {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}&filtro_desc_medicina={{ filtro_desc_medicina }}&filtro_almacen={{ filtro_almacen_id }}" 
+            <a href="?page={{ page_obj.previous_page_number }}&filtro_desc_medicina={{ filtro_desc_medicina }}&filtro_ubicacion={{ filtro_ubicacion_id }}" 
                 class="btn_paginacion">&lt;</a>
         {% else %}
             <span class="btn_paginacion_disabled">&lt;</span>
@@ -50,38 +50,38 @@
                 </div>
 
                 <div class="info_medicina">
-                    <p class="desc_medicina"><span class="span_desc_medicina">Medicina:</span> {{ medicina.desc_medicina }}</p>
+                    <p class="desc_medicina"><span class="span_desc_medicina">Medicina:</span> {{ medicina.medicina }}</p>
                     <p class="desc_medicina">
-                        <span class="span_desc_medicina">Almacén:</span>
-                        {% if medicina.almacen_perteneciente %}
-                            {{ medicina.almacen_perteneciente.desc_almacen }}
+                        <span class="span_desc_medicina">Ubicación:</span>
+                        {% if medicina.ubicacion %}
+                            {{ medicina.ubicacion.desc_ubicacion }}
                         {% else %}
-                            Sin almacén
+                            Sin ubicación
                         {% endif %}
                     </p>
                     <p class="desc_medicina">
                         <span class="span_desc_medicina">Cantidad:</span>
-                         {{ medicina.cantidad }} ({{ medicina.medida_medicina.desc_medida }})
+                         {{ medicina.cantidad }}
                     </p>
 
                     <div class="caja_acciones" style="display:flex; gap:10px;">
                         <button type="button" class="btn_sumar" 
-                            data-id="{{ medicina.id_medicina }}" 
-                            data-desc="{{ medicina.desc_medicina }}" 
-                            data-cantidad="{{ medicina.cantidad }}">+</button>
+                                data-id="{{ medicina.id_medicina }}" 
+                                data-desc="{{ medicina.desc_medicina }}" 
+                                data-cantidad="{{ medicina.cantidad }}">+</button>
 
                         <button type="button" class="btn_restar" 
-                            data-id="{{ medicina.id_medicina }}" 
-                            data-desc="{{ medicina.desc_medicina }}" 
-                            data-cantidad="{{ medicina.cantidad }}">-</button>
+                                data-id="{{ medicina.id_medicina }}" 
+                                data-desc="{{ medicina.desc_medicina }}" 
+                                data-cantidad="{{ medicina.cantidad }}">-</button>
 
-                        <a href="{% url 'edicion_medicina' medicina.id_medicina %}?page={{ request.GET.page }}&filtro_desc_medicina={{ request.GET.filtro_desc_medicina|urlencode }}&filtro_almacen={{ request.GET.filtro_almacen|urlencode }}" class="btn_editar">
+                        <a href="{% url 'edicion_medicina' medicina.id_medicina %}?page={{ request.GET.page }}&filtro_desc_medicina={{ request.GET.filtro_desc_medicina|urlencode }}&filtro_ubicacion={{ request.GET.filtro_ubicacion|urlencode }}" class="btn_editar">
                             Editar
                         </a>
 
                         <button type="button" class="btn_borrar"
-                            data-id="{{ medicina.id_medicina }}"
-                            data-desc="{{ medicina.desc_medicina }}">
+                                data-id="{{ medicina.id_medicina }}"
+                                data-desc="{{ medicina.medicina }}">
                             Borrar
                         </button>
                     </div>
@@ -93,7 +93,7 @@
         </div>
 
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&filtro_desc_medicina={{ filtro_desc_medicina }}&filtro_almacen={{ filtro_almacen_id }}" 
+            <a href="?page={{ page_obj.next_page_number }}&filtro_desc_medicina={{ filtro_desc_medicina }}&filtro_ubicacion={{ filtro_ubicacion_id }}" 
             class="btn_paginacion">&gt;</a>
         {% else %}
             <span class="btn_paginacion_disabled">&gt;</span>

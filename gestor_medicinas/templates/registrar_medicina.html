@@ -11,10 +11,12 @@
     
     <form method="post" enctype="multipart/form-data" class="form">
         {% csrf_token %}
-        <h1 class="titulo2">Registrar nueva medicina</h1>
+        <h1 class="titulo2">Registrar medicina</h1>
 
         <div class="contenedor_campo_img">
-            <label for="imagen_medicina" class="custom-file-upload">Imagen</label>
+            <label for="imagen_medicina" class="custom-file-upload">
+                Imagen
+            </label>
             <input type="file" id="imagen_medicina" name="imagen_medicina" accept="image/*" class="boton_imagen" style="overflow:hidden;">
 
             <!-- Elemento donde mostrar el nombre de la imagen -->
@@ -33,27 +35,76 @@
                 });
             </script>
         </div>
-       
-        <div class="contenedor_campo">
-            <label for="desc_medicina">Descripción:</label>
-            <input type="text" id="desc_medicina" name="desc_medicina" maxlength="400" minlength="3" required value="{{ desc_medicina|default_if_none:'' }}" class="campo">
-        </div>
         
-        <div class="contenedor_campo">
-            <label for="cantidad">Cantidad:</label>
-            <!-- Validación para los dígitos después -->
-            <input type="number" step="0.01" id="cantidad" name="cantidad" min="0" max="50000" value="{{ cantidad|default_if_none:'0' }}" required class="campo">
+        <div class="bloque_form_campos">
+            <div class="cont_campos">
+                <label for="medicina">Medicina:</label>
+                <input type="text" id="medicina" name="medicina" maxlength="400" minlength="3" required value="{{ desc_medicina|default_if_none:'' }}" class="campo" required>
+            </div>
+
+            <div class="cont_campos">
+                <label for="medida">Presentacion:</label>
+                <select name="medida" class="campo" required>
+                    {% for presentacion_leida in presentaciones %}
+                    <option value="{{ presentacion_leida.id_presentacion_medicamento }}">{{ presentacion_leida.desc_presentacion_medicamento }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
-        <div class="contenedor_campo">
-            <label for="medida">Tipo de medida:</label>
-            <select name="medida" class="campo">
-                {% for medidas_leidas in medidas %}
-                <option value="{{ medidas_leidas.id_medida }}">{{ medidas_leidas.desc_medida }}</option>
-                {% endfor %}
-            </select>
-        </div>  
+        <div class="bloque_form_campos">
+            <div class="cont_campos">
+                <label for="cantidad">Cantidad:</label>
+                <input type="number" id="cantidad" name="cantidad" min="0" max="100000" value="{{ cantidad|default_if_none:'0' }}" required class="campo">
+            </div>
 
+            <div class="cont_campos">
+                <label for="medicina">Laboratorio:</label>
+                <input type="text" id="laboratorio" name="laboratorio" maxlength="350" minlength="2" required value="{{ laboratorio|default_if_none:'' }}" class="campo" required>
+            </div>
+        </div>
+
+        <div class="bloque_form_campos">
+            <div class="cont_campos">
+                <label for="medida">Ubicacion:</label>
+                <select name="ubicacion" class="campo" required>
+                    {% for ubicaciones_leidas in ubicaciones_activas %}
+                    <option value="{{ ubicaciones_leidas.id_ubicacion }}">{{ ubicaciones_leidas.desc_ubicacion }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="cont_campos">
+                <label for="medicina">Anaquel:</label>
+                <input type="text" id="anaquel" name="anaquel" maxlength="100" minlength="2" required value="{{ anaquel|default_if_none:'' }}" class="campo" required>
+            </div>
+        </div>
+
+        <div class="bloque_form_campos">
+            <div class="cont_campos2">
+                <label for="medicina">Descripcion:</label>
+                <textarea name="descripcion" id="" class="campo_textarea"></textarea>
+            </div>
+        </div>
+
+        <div class="bloque_form_campos">
+            <div class="cont_campos2">
+                <label for="medicina">Observaciones:</label>
+                <textarea name="observacion" id="" class="campo_textarea"></textarea>
+            </div>
+        </div>
+
+        <!--
+                    <div class="cont_campos">
+                <label for="medida">Tipo de medida:</label>
+                <select name="medida" class="campo">
+                    {% for medidas_leidas in medidas %}
+                    <option value="{{ medidas_leidas.id_medida }}">{{ medidas_leidas.desc_medida }}</option>
+                    {% endfor %}
+                </select>
+            </div> 
+
+            
         <div class="contenedor_campo">
             <label for="almacen_perteneciente">Perteneciente:</label>
             <select id="almacen_perteneciente" name="almacen_perteneciente" class="campo">
@@ -66,6 +117,7 @@
                 {% endfor %}
             </select>
         </div>  
+        -->
 
         <div class="caja_botones">
             <button type="submit" class="boton_crear">Crear Medicina</button>

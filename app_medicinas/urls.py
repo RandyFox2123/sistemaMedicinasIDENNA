@@ -5,6 +5,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    #Autenticacion(Login)
+    path('login/', views.login_ingreso, name="login"),
+    path("cerrar_seccion/", views.cerrar_seccion, name="cerrar_seccion"),
+
     #General
     path('', views.index, name="index"),
     path('panel_principal/', views.panel_principal, name='panel_principal'),

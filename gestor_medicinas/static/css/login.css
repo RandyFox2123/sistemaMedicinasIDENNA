@@ -1,0 +1,180 @@
+
+/*Esto me sirve para importar mi hoja de estilos maestro, en ella estan los estilos base que usaran todas las demas hojas de stilos*/
+@import 'estilos_base.css';
+
+.login-card{
+    background-color: aliceblue;
+    border: 2px solid rgb(135, 226, 214);
+    border-radius: 10px;
+    width: 23%;
+    height: 380px;
+    padding: 20px;
+
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 70px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.campo{
+    width: 95%;
+    height: 11.7%;
+    border: 2px solid rgb(177, 226, 228);
+    border-radius: 10px;
+    margin: 0px 0px 10px 0px;
+}
+
+.campo:focus{
+    border: 2px solid rgb(132, 224, 212);
+    outline: none; /* Elimina el borde negro predeterminado */
+    box-shadow: 0 0 5px #9be6d8; /* Opcional: agrega un efecto de sombra */
+    background-color: #d6fff7;
+}
+
+.campo::selection{
+    /*Este lo usamos para el color de fondo del texto seleccionado*/
+    background-color: rgba(50, 170, 134, 0.37); 
+    /*Este lo usamos para el color del texto selecionado*/
+    color: inherit; 
+}
+
+.campo2{
+    width: 100%;
+    height: 80%;
+    border: 2px solid rgb(177, 226, 228);
+    border-radius: 10px;
+}
+
+.campo2:focus{
+    border: 2px solid rgb(132, 224, 212);
+    outline: none; /* Elimina el borde negro predeterminado */
+    box-shadow: 0 0 5px #9be6d8; /* Opcional: agrega un efecto de sombra */
+    background-color: #d6fff7;
+}
+
+.campo2::selection{
+    /*Este lo usamos para el color de fondo del texto seleccionado*/
+    background-color: rgba(50, 170, 134, 0.37); 
+    /*Este lo usamos para el color del texto selecionado*/
+    color: inherit; 
+}
+
+
+
+a{
+    text-decoration: none;
+    color: black;
+}
+
+.logo-login{
+    width: 100px;
+    margin: 0px;
+
+}
+
+.ingresar{
+    font-size: 30px;
+    margin: 0px;
+}
+
+.boton-ingresar{
+    background-color: white;
+    border: 2px groove rgb(236, 73, 122);
+    border-radius: 10px;
+    padding: 8px 10px;
+    color: rgb(8, 54, 85);
+    margin-top: 10px;
+    width: 60%;
+}
+.boton-ingresar:hover{
+    background-color: rgb(255, 76, 210);
+    border: 2px inset rgb(235, 61, 226);
+    box-shadow: 1px 2px 20px 2px rgb(216, 30, 170);
+    transition-duration: 0.4s;
+    color: white;
+    cursor: pointer;
+}
+
+.caja_campo_contraseña{
+    padding: 2px;
+    width: 97%;
+    height: 50px;
+
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+}
+
+.toggle-password{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    background-color: rgb(177, 226, 228);
+    border-radius: 50px;
+    
+    padding: 0px;
+    height: 33.5px;
+    align-items: center;
+    
+    position: absolute;
+    z-index: 2;
+    cursor: pointer;
+}
+
+
+
+
+
+
+/*===>  Estilo del mensaje de error en el login
+/* Estilos para la alerta personalizada */
+.custom-alert {
+    display: none; /* Oculta la alerta por defecto */
+    position: fixed; /* Posición fija para que aparezca sobre todo */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centra la alerta */
+    background-color: aliceblue;
+    border: 2px solid rgb(135, 226, 214);
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    text-align: center;
+}
+            
+.custom-alert .message {
+    margin-bottom: 10px;
+}
+            
+.custom-alert .close-button {
+    background-color: #ce362c;
+    border: 2px solid rgb(241, 99, 74);
+    border-radius: 10px;
+    color: white;
+    padding: 5px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+}
+            
+/* Estilo para el fondo oscuro */
+.overlay {
+    display: none; /* Oculta el fondo oscuro por defecto */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semi-transparente */
+    z-index: 999; /* Asegura que esté por debajo de la alerta */
+}
+
+

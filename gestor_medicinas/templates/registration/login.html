@@ -1,0 +1,48 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <title>{% block title %}Ingreso al sistema{% endblock %}</title>
+
+{% endblock %}
+
+{% block body %}
+    <main>
+        <form action="/login/" method="post" class="login-card">
+            {% csrf_token %}
+            <img src="{% static 'img/login.webp' %}" alt="Icono de usuario" class="logo-login">
+            <p class="ingresar">Ingresar</p>
+
+            <div class="custom-alert" id="customAlert">
+                <div class="message" id="alertMessage"></div>
+                <button class="close-button" onclick="closeAlert()">Entendido</button>
+            </div>
+            <div class="overlay" id="overlay"></div>
+            
+            
+            {% if mensaje %}
+            <div class="error" id="error-messages" style="display:none;">
+                <p>{{ mensaje }}</p>
+            </div>
+            {% endif %}
+
+            {% if perfil %}
+                <input type="text" name="username" placeholder="Nombre de usuario..." class="campo" value="{{ perfil }}" required>
+                
+            {%else%}
+
+                <input type="text" name="username" placeholder="Nombre de usuario..." class="campo" required>
+            {%endif%}
+            
+
+            <div class="caja_campo_contraseña">
+                <input type="password" id="password" name="password" placeholder="Contraseña..." class="campo2" required>
+                <span class="toggle-password" onclick="togglePassword()">👁️</span>
+            </div>
+
+            <input type="submit" value="Ingresar" class="boton-ingresar">
+        </form>
+    </main>
+
+    <script src="{% static 'js/complementos_login.js' %}"></script>
+{% endblock %}

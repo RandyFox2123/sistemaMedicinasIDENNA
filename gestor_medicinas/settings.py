@@ -29,6 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -125,3 +126,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+#CORRECCION LOGIN
+LOGIN_URL = '/login/'  # Apunta a tu vista personalizada
+LOGIN_REDIRECT_URL = '/panel_principal/'  # Tras login exitoso
+LOGOUT_REDIRECT_URL = '/'  # Tras logout
+
