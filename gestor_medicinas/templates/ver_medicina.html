@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/registro_edicion.css' %}">
+    <title>{% block title %}Ver Medicina{% endblock %}</title>
+{% endblock %}
+
+{% block body %}
+<main>
+    
+    <div class="form">
+        <h1 class="titulo2">Consultar Medicina</h1>
+
+        {% if medicina_consultada.imagen_medicina %}
+            <img src="{{ medicina_consultada.imagen_medicina.url }}" alt="Imagen medicina" class="imagen_juguete">
+        {% else %}
+            <p class="text_sin_imagen">Sin imagen</p>    
+        {% endif %}
+
+        <div class="bloque_form_campos">
+            <div class="cont_campos">
+                <label for="medicina">Medicina:</label>
+                <input type="text" id="medicina" name="medicina" maxlength="400" minlength="3" value="{{ medicina_consultada.medicina }}" readonly class="campo">
+            </div>
+
+            <div class="cont_campos">
+                <label for="presentacion">Presentacion:</label>
+                <input type="text" id="presentacion" name="presentacion" value="{{ medicina_consultada.presentacion.desc_presentacion_medicamento }}" readonly class="campo">
+            </div>
+        </div>
+
+        <div class="bloque_form_campos">
+            <div class="cont_campos">
+                <label for="cantidad">Cantidad:</label>
+                <input type="number" id="cantidad" name="cantidad" min="0" max="100000" value="{{ medicina_consultada.cantidad }}" readonly class="campo">
+            </div>
+
+            <div class="cont_campos">
+                <label for="laboratorio">Laboratorio:</label>
+                <input type="text" id="laboratorio" name="laboratorio" maxlength="350" value="{{ medicina_consultada.laboratorio }}" readonly class="campo">
+            </div>
+        </div>
+
+        <div class="bloque_form_campos">
+            <div class="cont_campos">
+                <label for="ubicacion">Ubicacion:</label>
+                <input type="text" id="ubicacion" name="ubicacion" value="{{ medicina_consultada.ubicacion.desc_ubicacion }}" readonly class="campo">
+            </div>
+
+            <div class="cont_campos">
+                <label for="anaquel">Anaquel:</label>
+                <input type="text" id="anaquel" name="anaquel" maxlength="100" value="{{ medicina_consultada.anaquel }}" readonly class="campo">
+            </div>
+        </div>
+
+        <div class="bloque_form_campos">
+            <div class="cont_campos">
+                <label for="creador">Registrante:</label>
+                <input type="text" id="creador" name="creador" value="{{ medicina_consultada.creador_del_registro }}" readonly class="campo">
+            </div>
+            <div class="cont_campos">
+                <label for="fecha">Fecha registro:</label>
+                <input type="text" id="fecha" name="fecha" value="{{ medicina_consultada.fecha_registro }}" readonly class="campo">
+            </div>
+        </div>
+
+        <div class="bloque_form_campos">
+            <div class="cont_campos2">
+                <label for="descripcion">Descripcion:</label>
+                <textarea name="descripcion" readonly class="campo_textarea">{{ medicina_consultada.descripcion }}</textarea>
+            </div>
+        </div>
+
+        <div class="bloque_form_campos">
+            <div class="cont_campos2">
+                <label for="observaciones">Observaciones:</label>
+                <textarea name="observaciones" readonly class="campo_textarea">{{ medicina_consultada.observaciones }}</textarea>
+            </div>
+        </div>
+
+        <div class="bloque_form_campos">
+            <div class="cont_campos2">
+                <label for="observaciones">Historial modificaciones:</label>
+                <textarea name="observaciones" readonly class="campo_textarea">{{ medicina_consultada.historial_edicion }}</textarea>
+            </div>
+        </div>
+
+        <div class="caja_botones">
+            <a href="{% url 'panel_principal' %}?{{ request.GET.urlencode }}" class="boton_volver">Volver</a>
+        </div>
+    </div>
+
+</main>
+{% endblock %}

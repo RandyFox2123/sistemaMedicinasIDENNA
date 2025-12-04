@@ -1,10 +1,14 @@
 
 
+
+.cont_imagen{
+    width: 100%;
+}
 .imagen_juguete{
     width: 100%;
     max-width:100%; 
     max-height:300px;
-    height: 300px;
+    height: 200px;
     border-radius: 20px;
 }
 
@@ -57,7 +61,19 @@
     justify-content: space-around;
     align-items: center;
     gap: 2px;
-
+}
+.bloque_form_campos2{
+    padding: 5px;
+    width: 98%;
+    text-align: left;
+    border-radius: 10px;
+    border: 1.5px solid rgb(170, 179, 182);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: start;
+    align-items: center;
+    gap: 2px;
 }
 .cont_campos{
     width: 48%;

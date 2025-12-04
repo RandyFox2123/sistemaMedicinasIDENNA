@@ -151,16 +151,27 @@
 
 .formulario_filtros{
     background-color: rgba(13, 74, 85, 0.692);
-    padding: 5px;
-    width: 550px;
+    padding: 8px;
+    width: 1000px;
+    display: block;
     text-align: center;
     margin-left: auto;
     margin-right: auto;
-    border-radius: 20px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.cont_filtro_fecha{
+    display: inline;
+}
+
+.label_fecha{
+    color: rgb(255, 242, 129);
 }
 
 .campo{
     border-radius: 5px;
+    width: 160px;
     background-color: rgba(231, 255, 253, 0.952);
     border: 2px solid rgb(116, 189, 189);
     color: rgb(65, 90, 97);
@@ -205,6 +216,25 @@
     color: #7d9e05;
     transition-duration: 0.4s;
     box-shadow: 0px 0px 20px 0px rgb(243, 255, 69);
+}
+
+.btn_ver{
+    background-color: rgb(18, 108, 211);
+    border: 2px solid rgb(66, 159, 175);
+    border-radius: 10px;
+    color: rgb(2, 39, 39);
+    padding: 2px 4px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.btn_ver:hover{
+    background-color: rgb(55, 152, 243);
+    color: #05879e;
+    transition-duration: 0.4s;
+    box-shadow: 0px 0px 20px 0px rgb(69, 227, 255);
 }
 
 .btn_borrar{
@@ -314,4 +344,11 @@
 .span_desc_medicina{
     color: rgb(231, 54, 78);
     font-weight: bold;
+}
+
+
+.ico_boton{
+    width: 30px;
+    height: 25px;
+
 }

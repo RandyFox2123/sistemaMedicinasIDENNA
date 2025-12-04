@@ -16,6 +16,7 @@ urlpatterns = [
     #Medicina
     path('registrar_medicina/', views.registrar_medicina, name='registrar_medicina'),
     path('edicion_medicina/<int:id_medicina>', views.editar_medicina, name='edicion_medicina'),
+    path('ver_medicina/<int:id_medicina>', views.ver_medicina, name='ver_medicina'),
     path('borrar_medicina/<int:id_medicina>', views.borrar_medicina, name='borrar_medicina'),
     path('sumar_medicina/<int:id_medicina>', views.sumar_cantidad_medicina, name='sumar_medicina'),
     path('restar_medicina/<int:id_medicina>', views.restar_cantidad_medicina, name='restar_medicina'),

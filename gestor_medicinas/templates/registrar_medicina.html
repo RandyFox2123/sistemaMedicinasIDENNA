@@ -18,8 +18,6 @@
                 Imagen
             </label>
             <input type="file" id="imagen_medicina" name="imagen_medicina" accept="image/*" class="boton_imagen" style="overflow:hidden;">
-
-            <!-- Elemento donde mostrar el nombre de la imagen -->
             <span id="nombre_imagen">Ninguna imagen seleccionada</span>
 
             <script>
@@ -76,14 +74,14 @@
 
             <div class="cont_campos">
                 <label for="medicina">Anaquel:</label>
-                <input type="text" id="anaquel" name="anaquel" maxlength="100" minlength="2" required value="{{ anaquel|default_if_none:'' }}" class="campo" required>
+                <input type="text" id="anaquel" name="anaquel" maxlength="100" minlength="1" required value="{{ anaquel|default_if_none:'' }}" class="campo" required>
             </div>
         </div>
 
         <div class="bloque_form_campos">
             <div class="cont_campos2">
                 <label for="medicina">Descripcion:</label>
-                <textarea name="descripcion" id="" class="campo_textarea"></textarea>
+                <textarea name="descripcion" id="" class="campo_textarea" required></textarea>
             </div>
         </div>
 
@@ -94,35 +92,10 @@
             </div>
         </div>
 
-        <!--
-                    <div class="cont_campos">
-                <label for="medida">Tipo de medida:</label>
-                <select name="medida" class="campo">
-                    {% for medidas_leidas in medidas %}
-                    <option value="{{ medidas_leidas.id_medida }}">{{ medidas_leidas.desc_medida }}</option>
-                    {% endfor %}
-                </select>
-            </div> 
-
-            
-        <div class="contenedor_campo">
-            <label for="almacen_perteneciente">Perteneciente:</label>
-            <select id="almacen_perteneciente" name="almacen_perteneciente" class="campo">
-                {% for almacen in almacenes_activos %}
-                    <option value="{{ almacen.id_almacen }}"
-                        {% if almacen_perteneciente|stringformat:'s' == almacen.id_almacen|stringformat:'s' %}
-                            selected
-                        {% endif %}
-                    >{{ almacen.desc_almacen }}</option>
-                {% endfor %}
-            </select>
-        </div>  
-        -->
-
         <div class="caja_botones">
             <button type="submit" class="boton_crear">Crear Medicina</button>
 
-            <a href="{% url 'panel_principal' %}?page={{ request.GET.page }}&filtro_desc_medicina={{ request.GET.filtro_desc_medicina|urlencode }}&filtro_almacen={{ request.GET.filtro_almacen|urlencode }}" class="boton_volver">Volver</a>
+            <a href="{% url 'panel_principal' %}?{{ request.GET.urlencode }}" class="boton_volver">Volver</a>
         </div>
     </form>
 

@@ -28,8 +28,12 @@
                 Registrar medicina
             </a>
 
-            <a href="{% url 'generar_excel' %}?filtro_desc_medicina={{ filtro_desc_medicina|urlencode }}&filtro_almacen={{ filtro_almacen_id|urlencode }}" class="link">
+            <a href="{% url 'generar_excel' %}?{{ filtros_qs }}" class="link">
             Generar Excel
+            </a>
+
+            <a href="{% url 'cerrar_seccion' %}" class="link">
+            Salir
             </a>
         </nav>
     </header>

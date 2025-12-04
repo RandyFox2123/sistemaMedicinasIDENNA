@@ -13,6 +13,9 @@ from decimal import Decimal
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from datetime import date
+from django.utils.http import urlencode
+from django.conf import settings
 
 
 
@@ -114,24 +117,48 @@ def index(request):
     return render(request, 'index.html')
 
 
-@manejo_errores
+
+
+
 @login_required
 @require_safe
 def panel_principal(request):
     ubicaciones_activas = Ubicacion.objects.filter(estado=True)
-    filtro_desc_medicina = request.GET.get('filtro_desc_medicina', '').strip()
+    presentaciones_activas = Presentacion_Medicamento.objects.all()
+
+    filtro_medicina = request.GET.get('filtro_medicina', '').strip()
     filtro_ubicacion_id = request.GET.get('filtro_ubicacion', '').strip()
-    page_num = request.GET.get('page', '')
+    filtro_presentacion_id = request.GET.get('filtro_presentacion', '').strip()
+    fecha_desde = request.GET.get('fecha_desde', '').strip()
+    fecha_hasta = request.GET.get('fecha_hasta', '').strip()
+    page_num = request.GET.get('page', 1)
+
     medicinas_qs = Medicina.objects.filter(ubicacion__estado=True)
 
-    if filtro_desc_medicina:
-        medicinas_qs = medicinas_qs.filter(desc_medicina__icontains=filtro_desc_medicina).order_by('-id_medicina')
+
+    if filtro_medicina:
+        medicinas_qs = medicinas_qs.filter(medicina__icontains=filtro_medicina)
+
 
     if filtro_ubicacion_id.isdigit():
-        medicinas_qs = medicinas_qs.filter(ubicacion_id=int(filtro_ubicacion_id)).order_by('-id_medicina')
+        medicinas_qs = medicinas_qs.filter(ubicacion_id=int(filtro_ubicacion_id))
 
-    paginator = Paginator(medicinas_qs.order_by('-id_medicina'), 3)
+
+    if filtro_presentacion_id.isdigit():
+        medicinas_qs = medicinas_qs.filter(presentacion_id=int(filtro_presentacion_id))
+
+
+    if fecha_desde:
+        medicinas_qs = medicinas_qs.filter(fecha_registro__gte=fecha_desde)
+    if fecha_hasta:
+        medicinas_qs = medicinas_qs.filter(fecha_registro__lte=fecha_hasta)
+
+    medicinas_qs = medicinas_qs.order_by('-id_medicina')
+
+
+    paginator = Paginator(medicinas_qs, 3)
     page_obj = paginator.get_page(page_num)
+
 
     for medicina in page_obj:
         if medicina.imagen_medicina and medicina.imagen_medicina.name:
@@ -140,27 +167,37 @@ def panel_principal(request):
         else:
             medicina.imagen_existe = False
 
-    query_params = []
-    if filtro_desc_medicina:
-        query_params.append(f"filtro_desc_medicina={filtro_desc_medicina}")
-    if filtro_ubicacion_id:
-        query_params.append(f"filtro_ubicacion={filtro_ubicacion_id}")
-    if page_num:
-        query_params.append(f"page={page_num}")
-
-    url_con_filtros = reverse('panel_principal')
-    if query_params:
-        url_con_filtros += '?' + '&'.join(query_params)
-
-    request.session['url_panel_principal'] = url_con_filtros
+  
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        get_params.pop('page')
+    filtros_qs = get_params.urlencode() 
 
     contexto = {
         'page_obj': page_obj,
         'ubicaciones_activas': ubicaciones_activas,
-        'filtro_desc_medicina': filtro_desc_medicina,
+        'presentaciones_activas': presentaciones_activas,
+        'filtro_medicina': filtro_medicina,
         'filtro_ubicacion_id': filtro_ubicacion_id,
+        'filtro_presentacion_id': filtro_presentacion_id,
+        'fecha_desde': fecha_desde,
+        'fecha_hasta': fecha_hasta,
+        'filtros_qs': filtros_qs,
     }
     return render(request, 'panel_principal.html', contexto)
+
+
+@manejo_errores
+@login_required
+@require_safe
+def ver_medicina(request, id_medicina):
+    medicina_consultada = get_object_or_404(Medicina, pk=id_medicina)
+    ubicaciones_activas = Ubicacion.objects.filter(estado=True)
+    presentaciones = Presentacion_Medicamento.objects.all()
+
+    contexto = {"medicina_consultada":medicina_consultada, "ubicaciones":ubicaciones_activas, "presentaciones":presentaciones}
+    return render(request, 'ver_medicina.html', contexto)
+
 
 @manejo_errores
 @login_required
@@ -170,39 +207,70 @@ def registrar_medicina(request):
     presentaciones = Presentacion_Medicamento.objects.all()
 
     if request.method == 'POST':
-        desc_medicina = request.POST.get('desc_medicina', '').strip()
-        ubicacion_id = request.POST.get('ubicacion_perteneciente')
+        desc_medicina = request.POST.get('medicina', '').strip()
+        presentacion_id = request.POST.get('medida')
         imagen = request.FILES.get('imagen_medicina')
         cantidad_str = request.POST.get('cantidad', '0').strip()
+        laboratorio = request.POST.get('laboratorio', '').strip()
+        ubicacion_id = request.POST.get('ubicacion')
+        anaquel = request.POST.get('anaquel', '').strip()
+        descripcion = request.POST.get('descripcion', '').strip()
+        observaciones = request.POST.get('observacion', '').strip()
 
-        if Medicina.objects.filter(desc_medicina__iexact=desc_medicina).exists():
+
+        """
+        if Medicina.objects.filter(medicina__iexact=desc_medicina).exists():
             raise error_contexto("Ya existe una medicina con esta descripcion.")
+        """
 
         if not desc_medicina:
             raise error_contexto("La descripcion es obligatoria.")
 
-        try:
-            cantidad = float(cantidad_str.replace(',', '.'))
-            if cantidad < 0 or cantidad > 50000:
-                raise error_contexto("La cantidad debe ser un numero mayor o igual a 0 o maximo 50000")
-        except ValueError:
-            raise error_contexto("La cantidad debe ser un numero valido.")
+    
+        presentacion_obj = None
+        if presentacion_id and presentacion_id.isdigit():
+            presentacion_obj = Presentacion_Medicamento.objects.filter(pk=int(presentacion_id)).first()
+        if not presentacion_obj:
+            raise error_contexto("Selecciona una presentación válida.")
+
 
         ubicacion_obj = None
         if ubicacion_id and ubicacion_id.isdigit():
             ubicacion_obj = Ubicacion.objects.filter(pk=int(ubicacion_id), estado=True).first()
+        if not ubicacion_obj:
+            raise error_contexto("Selecciona una ubicación válida.")
+
+        try:
+            cantidad = float(cantidad_str.replace(',', '.'))
+            if cantidad < 0 or cantidad > 100000:
+                raise error_contexto("La cantidad debe ser un número entre 0 y 100000.")
+        except ValueError:
+            raise error_contexto("La cantidad debe ser un número válido.")
+
 
         nueva_medicina = Medicina(
-            desc_medicina=desc_medicina,
-            ubicacion_perteneciente=ubicacion_obj,
-            cantidad=cantidad,
+            medicina=desc_medicina,
+            presentacion=presentacion_obj,
+            cantidad=int(cantidad),
+            laboratorio=laboratorio,
+            ubicacion=ubicacion_obj,
+            anaquel=anaquel,
+            descripcion=descripcion,
+            observaciones=observaciones,
+            creador_del_registro=request.user.username if request.user.is_authenticated else 'Anonimo',
+            historial_edicion='Nadie',
+            fecha_registro=date.today()
         )
+
         if imagen:
             nueva_medicina.imagen_medicina = imagen
+
         nueva_medicina.save()
 
-        url_redireccion = request.session.get('url_panel_principal', reverse('panel_principal'))
-        return HttpResponseRedirect(url_redireccion)
+
+        #url_redireccion = request.session.get('url_panel_principal', reverse('panel_principal'))
+        #return redirect(url_redireccion)
+        return redirect('panel_principal')
 
     return render(request, 'registrar_medicina.html', {'ubicaciones_activas': ubicaciones_activas, 'presentaciones': presentaciones})
 
@@ -211,47 +279,72 @@ def registrar_medicina(request):
 @require_http_methods(["GET", "POST"])
 def editar_medicina(request, id_medicina):
     medicina_obj = get_object_or_404(Medicina, pk=id_medicina)
-    ubicaciones_activas = Ubicacion.objects.filter(estado=True)
-    cantidad_formateada_medicina_editada = str(medicina_obj.cantidad).replace(',', '.')
+    ubicaciones = Ubicacion.objects.filter(estado=True)
+    presentaciones = Presentacion_Medicamento.objects.all()
 
     if request.method == 'POST':
-        desc_medicina = request.POST.get('desc_medicina', '').strip()
-        ubicacion_id = request.POST.get('ubicacion_perteneciente')
+        # Obtener los datos del formulario
+        desc_medicina = request.POST.get('medicina', '').strip()
+        presentacion_id = request.POST.get('presentacion')
+        ubicacion_id = request.POST.get('ubicacion')
         nueva_imagen = request.FILES.get('imagen_medicina')
         cantidad_str = request.POST.get('cantidad', '').strip()
-        desc_medicina_vieja = request.POST.get('desc_medicina_vieja', '').strip()
+        laboratorio = request.POST.get('laboratorio', '').strip()
+        anaquel = request.POST.get('anaquel', '').strip()
+        descripcion = request.POST.get('descripcion', '').strip()
+        observaciones = request.POST.get('observaciones', '').strip()
 
-        if desc_medicina_vieja != desc_medicina:
-            if Medicina.objects.filter(desc_medicina__iexact=desc_medicina).exists():
-                raise error_contexto("Ya existe una medicina con esta descripcion.")
-        else:
-            desc_medicina = desc_medicina_vieja
+        """
+        if medicina_obj.medicina.lower() != desc_medicina.lower():
+            if Medicina.objects.filter(medicina__iexact=desc_medicina).exclude(pk=medicina_obj.pk).exists():
+                raise error_contexto("Ya existe una medicina con esta descripción.")
 
         if not desc_medicina:
-            raise error_contexto("La descripcion es obligatoria.")
+            raise error_contexto("La descripción es obligatoria.")
+        
+        """
 
-        if cantidad_str == '':
-            raise error_contexto("La cantidad es obligatoria.")
 
-        try:
-            cantidad = float(cantidad_str.replace(',', '.'))
-            if cantidad < 0 or cantidad > 50000:
-                raise error_contexto("La cantidad debe ser un numero mayor o igual a 0 o maximo 50000")
-        except ValueError:
-            raise error_contexto("La cantidad debe ser un numero valido.")
+        if not cantidad_str.isdigit():
+            raise error_contexto("La cantidad debe ser un número entero válido.")
+        cantidad = int(cantidad_str)
+        if cantidad < 0 or cantidad > 100000:
+            raise error_contexto("La cantidad debe estar entre 0 y 100000.")
 
         ubicacion_obj = None
         if ubicacion_id and ubicacion_id.isdigit():
             ubicacion_obj = Ubicacion.objects.filter(pk=int(ubicacion_id), estado=True).first()
+
+        presentacion_obj = None
+        if presentacion_id and presentacion_id.isdigit():
+            presentacion_obj = Presentacion_Medicamento.objects.filter(pk=int(presentacion_id)).first()
 
         if nueva_imagen:
             if medicina_obj.imagen_medicina and os.path.isfile(medicina_obj.imagen_medicina.path):
                 os.remove(medicina_obj.imagen_medicina.path)
             medicina_obj.imagen_medicina = nueva_imagen
 
-        medicina_obj.desc_medicina = desc_medicina
-        medicina_obj.ubicacion_perteneciente = ubicacion_obj
+
+        """
+        historial_modificaciones = 
+                    creador_del_registro=request.user.username if request.user.is_authenticated else 'Anonimo',
+            historial_edicion='Nadie',
+            fecha_registro=date.today()
+        
+        bien_a_mover.historial_movimientos = historial_movimientos_actual + f" -> {desc_nueva_ubicacion_bien}"
+        """
+
+        nuevo_historial_edicion = f"{date.today()} : {request.user.username}"
+
+        medicina_obj.medicina = desc_medicina
+        medicina_obj.presentacion = presentacion_obj
+        medicina_obj.ubicacion = ubicacion_obj
         medicina_obj.cantidad = cantidad
+        medicina_obj.laboratorio = laboratorio
+        medicina_obj.anaquel = anaquel
+        medicina_obj.descripcion = descripcion
+        medicina_obj.historial_edicion = medicina_obj.historial_edicion + f",  {nuevo_historial_edicion}"
+        medicina_obj.observaciones = observaciones
         medicina_obj.save()
 
         url_redireccion = request.session.get('url_panel_principal', reverse('panel_principal'))
@@ -259,8 +352,8 @@ def editar_medicina(request, id_medicina):
 
     contexto = {
         'medicina_obj': medicina_obj,
-        'ubicaciones_activas': ubicaciones_activas,
-        'medida_formateada': cantidad_formateada_medicina_editada,
+        'ubicaciones_activas': ubicaciones,
+        'presentaciones': presentaciones,
     }
     return render(request, 'editar_medicina.html', contexto)
 
@@ -326,37 +419,66 @@ def restar_cantidad_medicina(request, id_medicina):
 @login_required
 @require_safe
 def generar_excel(request):
-    filtro_desc_medicina = request.GET.get('filtro_desc_medicina', '').strip()
+    filtro_medicina = request.GET.get('filtro_medicina', '').strip()
     filtro_ubicacion_id = request.GET.get('filtro_ubicacion', '').strip()
+    filtro_presentacion_id = request.GET.get('filtro_presentacion', '').strip()
+    fecha_desde = request.GET.get('fecha_desde', '').strip()
+    fecha_hasta = request.GET.get('fecha_hasta', '').strip()
 
-    medicinas_qs = Medicina.objects.filter(ubicacion_perteneciente__estado=True)
+    medicinas_qs = Medicina.objects.filter(ubicacion__estado=True)
 
-    if filtro_desc_medicina:
-        medicinas_qs = medicinas_qs.filter(desc_medicina__icontains=filtro_desc_medicina)
+    if filtro_medicina:
+        medicinas_qs = medicinas_qs.filter(medicina__icontains=filtro_medicina)
 
     if filtro_ubicacion_id.isdigit():
-        medicinas_qs = medicinas_qs.filter(ubicacion_perteneciente_id=int(filtro_ubicacion_id))
+        medicinas_qs = medicinas_qs.filter(ubicacion_id=int(filtro_ubicacion_id))
+
+    if filtro_presentacion_id.isdigit():
+        medicinas_qs = medicinas_qs.filter(presentacion_id=int(filtro_presentacion_id))
+
+    if fecha_desde:
+        medicinas_qs = medicinas_qs.filter(fecha_registro__gte=fecha_desde)
+    if fecha_hasta:
+        medicinas_qs = medicinas_qs.filter(fecha_registro__lte=fecha_hasta)
 
     medicinas_qs = medicinas_qs.order_by('id_medicina')
 
     wb = Workbook()
     ws = wb.active
+    ws.title = "Medicinas"
 
-    ws['A1'] = 'Descripcion Medicina'
-    ws['B1'] = 'Ubicacion'
+    ws['A1'] = 'Nombre medicina'
+    ws['B1'] = 'Presentación'
     ws['C1'] = 'Cantidad'
+    ws['D1'] = 'Laboratorio'
+    ws['E1'] = 'Ubicación'
+    ws['F1'] = 'Anaquel'
+    ws['G1'] = 'Descripción'
+    ws['H1'] = 'Observaciones'
+    ws['I1'] = 'Creador del registro'
+    ws['J1'] = 'Historial de edición'
+    ws['K1'] = 'Fecha de registro'
 
     row = 2
     for medicina in medicinas_qs:
-        ws[f'A{row}'] = medicina.desc_medicina
-        ws[f'B{row}'] = medicina.ubicacion_perteneciente.desc_ubicacion if medicina.ubicacion_perteneciente else "Sin ubicacion"
-        ws[f'C{row}'] = float(medicina.cantidad)
+        ws[f'A{row}'] = medicina.medicina
+        ws[f'B{row}'] = medicina.presentacion.desc_presentacion_medicamento if medicina.presentacion else "Sin presentación"
+        ws[f'C{row}'] = medicina.cantidad
+        ws[f'D{row}'] = medicina.laboratorio or "No indica"
+        ws[f'E{row}'] = medicina.ubicacion.desc_ubicacion if medicina.ubicacion else "Sin ubicación"
+        ws[f'F{row}'] = medicina.anaquel
+        ws[f'G{row}'] = medicina.descripcion
+        ws[f'H{row}'] = medicina.observaciones or ""
+        ws[f'I{row}'] = medicina.creador_del_registro
+        ws[f'J{row}'] = medicina.historial_edicion
+        ws[f'K{row}'] = medicina.fecha_registro.strftime('%Y-%m-%d') if medicina.fecha_registro else ""
         row += 1
 
     nombre_archivo = "Reporte_Medicinas.xlsx"
 
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
     response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
-
     wb.save(response)
     return response

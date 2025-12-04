@@ -11,25 +11,68 @@
 
     <div class="cont_form_filtros">
         <form method="get" action="" class="formulario_filtros">
-            <input type="text" name="filtro_desc_medicina" placeholder="Buscar medicina..." value="{{ filtro_desc_medicina }}" class="campo">
-            
+
+            <input type="text" name="filtro_medicina" placeholder="Buscar medicina..." value="{{ filtro_medicina }}" class="campo">
+
+            <select name="filtro_presentacion" class="campo">
+                <option value="">Todas presentaciones</option>
+                {% for presentacion in presentaciones_activas %}
+                    <option value="{{ presentacion.id_presentacion_medicamento }}"
+                        {% if filtro_presentacion_id|stringformat:'s' == presentacion.id_presentacion_medicamento|stringformat:'s' %}
+                            selected
+                        {% endif %}>
+                        {{ presentacion.desc_presentacion_medicamento }}
+                    </option>
+                {% endfor %}
+            </select>
+
+
             <select name="filtro_ubicacion" class="campo">
-                <option value="">Todas las ubicaciones</option>
+                <option value="">Todas ubicaciones</option>
                 {% for ubicacion in ubicaciones_activas %}
-                    <option value="{{ ubicacion.id }}" {% if filtro_ubicacion_id|stringformat:'s' == ubicacion.id|stringformat:'s' %}selected{% endif %}>
+                    <option value="{{ ubicacion.id_ubicacion }}"
+                        {% if filtro_ubicacion_id|stringformat:'s' == ubicacion.id_ubicacion|stringformat:'s' %}
+                            selected
+                        {% endif %}>
                         {{ ubicacion.desc_ubicacion }}
                     </option>
                 {% endfor %}
             </select>
+
+
+            <div class="cont_filtro_fecha">
+                <label for="fecha_desde" class="label_fecha">Desde</label>
+                <input type="date"
+                       id="fecha_desde"
+                       name="fecha_desde"
+                       value="{{ fecha_desde }}"
+                       class="campo">
+            </div>
+
+            <div class="cont_filtro_fecha">
+                <label for="fecha_hasta" class="label_fecha">Hasta</label>
+                <input type="date"
+                       id="fecha_hasta"
+                       name="fecha_hasta"
+                       value="{{ fecha_hasta }}"
+                       class="campo">
+            </div>
 
             <button type="submit" class="boton_filtro">Filtrar</button>
         </form>
     </div>
 
     <div style="display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap: nowrap;">
+
+        {# PAGINACIÓN: usamos filtros_qs generado en la vista SIN page #}
         {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}&filtro_desc_medicina={{ filtro_desc_medicina }}&filtro_ubicacion={{ filtro_ubicacion_id }}" 
-                class="btn_paginacion">&lt;</a>
+            {% if filtros_qs %}
+                <a href="?page={{ page_obj.previous_page_number }}&{{ filtros_qs }}"
+                   class="btn_paginacion">&lt;</a>
+            {% else %}
+                <a href="?page={{ page_obj.previous_page_number }}"
+                   class="btn_paginacion">&lt;</a>
+            {% endif %}
         {% else %}
             <span class="btn_paginacion_disabled">&lt;</span>
         {% endif %}
@@ -50,7 +93,9 @@
                 </div>
 
                 <div class="info_medicina">
-                    <p class="desc_medicina"><span class="span_desc_medicina">Medicina:</span> {{ medicina.medicina }}</p>
+                    <p class="desc_medicina">
+                        <span class="span_desc_medicina">Medicina:</span> {{ medicina.medicina }}
+                    </p>
                     <p class="desc_medicina">
                         <span class="span_desc_medicina">Ubicación:</span>
                         {% if medicina.ubicacion %}
@@ -60,29 +105,46 @@
                         {% endif %}
                     </p>
                     <p class="desc_medicina">
+                        <span class="span_desc_medicina">Laboratorio:</span>
+                         {{ medicina.laboratorio }}
+                    </p>
+                    <p class="desc_medicina">
                         <span class="span_desc_medicina">Cantidad:</span>
                          {{ medicina.cantidad }}
                     </p>
 
+                    {# IMPORTANTE: mantener la estructura y data-* COMO EN TU PLANTILLA ORIGINAL #}
                     <div class="caja_acciones" style="display:flex; gap:10px;">
                         <button type="button" class="btn_sumar" 
                                 data-id="{{ medicina.id_medicina }}" 
-                                data-desc="{{ medicina.desc_medicina }}" 
+                                data-desc="{{ medicina.medicina }}" 
                                 data-cantidad="{{ medicina.cantidad }}">+</button>
 
                         <button type="button" class="btn_restar" 
                                 data-id="{{ medicina.id_medicina }}" 
-                                data-desc="{{ medicina.desc_medicina }}" 
+                                data-desc="{{ medicina.medicina }}" 
                                 data-cantidad="{{ medicina.cantidad }}">-</button>
 
-                        <a href="{% url 'edicion_medicina' medicina.id_medicina %}?page={{ request.GET.page }}&filtro_desc_medicina={{ request.GET.filtro_desc_medicina|urlencode }}&filtro_ubicacion={{ request.GET.filtro_ubicacion|urlencode }}" class="btn_editar">
-                            Editar
+                        {% if filtros_qs %}
+                            <a href="{% url 'ver_medicina' medicina.id_medicina %}?{{ filtros_qs }}" class="btn_ver">
+                        {% else %}
+                            <a href="{% url 'ver_medicina' medicina.id_medicina %}" class="btn_ver">
+                        {% endif %}
+                            <img src="{% static 'img/ico_ver.png' %}" alt="icono" class="ico_boton">
+                        </a>
+
+                        {% if filtros_qs %}
+                            <a href="{% url 'edicion_medicina' medicina.id_medicina %}?{{ filtros_qs }}" class="btn_editar">
+                        {% else %}
+                            <a href="{% url 'edicion_medicina' medicina.id_medicina %}" class="btn_editar">
+                        {% endif %}
+                            <img src="{% static 'img/ico_editar.png' %}" alt="icono" class="ico_boton">
                         </a>
 
                         <button type="button" class="btn_borrar"
                                 data-id="{{ medicina.id_medicina }}"
                                 data-desc="{{ medicina.medicina }}">
-                            Borrar
+                                <img src="{% static 'img/ico_borrar.png' %}" alt="icono" class="ico_boton">
                         </button>
                     </div>
                 </div>
@@ -93,12 +155,18 @@
         </div>
 
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&filtro_desc_medicina={{ filtro_desc_medicina }}&filtro_ubicacion={{ filtro_ubicacion_id }}" 
-            class="btn_paginacion">&gt;</a>
+            {% if filtros_qs %}
+                <a href="?page={{ page_obj.next_page_number }}&{{ filtros_qs }}"
+                   class="btn_paginacion">&gt;</a>
+            {% else %}
+                <a href="?page={{ page_obj.next_page_number }}"
+                   class="btn_paginacion">&gt;</a>
+            {% endif %}
         {% else %}
             <span class="btn_paginacion_disabled">&gt;</span>
         {% endif %}
     </div>
+
 
     <div id="overlay_suma" class="form_overlay" style="display:none;">
         <div class="form_popup">
@@ -151,5 +219,5 @@
     </div>
 </main>
 
-<script src="../static/js/emergentes.js"></script>
+<script src="{% static 'js/emergentes.js' %}"></script>
 {% endblock %}

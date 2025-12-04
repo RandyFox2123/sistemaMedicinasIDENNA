@@ -1,17 +1,17 @@
-{% extends '../base.html' %}
 {% load static %}
 {% block head %}
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
     <title>{% block title %}Ingreso al sistema{% endblock %}</title>
-
 {% endblock %}
 
 {% block body %}
     <main>
         <form action="/login/" method="post" class="login-card">
             {% csrf_token %}
-            <img src="{% static 'img/login.webp' %}" alt="Icono de usuario" class="logo-login">
-            <p class="ingresar">Ingresar</p>
+            <img src="{% static 'img/ico_login.png' %}" alt="Icono de usuario" class="logo-login">
+            <p class="ingresar">ACCEDER</p>
 
             <div class="custom-alert" id="customAlert">
                 <div class="message" id="alertMessage"></div>
