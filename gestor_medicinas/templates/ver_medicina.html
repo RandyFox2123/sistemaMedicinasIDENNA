@@ -66,6 +66,22 @@
         </div>
 
         <div class="bloque_form_campos">
+            <div class="cont_campos">
+                <label for="fecha_caducidad">Fecha caducidad:</label>
+                <input type="text" id="fecha_caducidad" name="fecha_caducidad" required value="{{ medicina_consultada.fecha_caducidad }}" class="campo" required>
+            </div>
+
+            <div class="cont_campos">
+                <label for="caducado">Caducado:</label>
+                {% if medicina_consultada.caducado == True %}
+                    <input type="text" id="caducado" name="caducado" required value="Si" class="campo" required>
+                {% else %}
+                    <input type="text" id="caducado" name="caducado" required value="No" class="campo" required>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="bloque_form_campos">
             <div class="cont_campos2">
                 <label for="descripcion">Descripcion:</label>
                 <textarea name="descripcion" readonly class="campo_textarea">{{ medicina_consultada.descripcion }}</textarea>

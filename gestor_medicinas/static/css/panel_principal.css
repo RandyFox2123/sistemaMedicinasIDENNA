@@ -19,7 +19,7 @@
     border: 1.5px solid rgb(85, 197, 178);
     background-color: rgba(240, 248, 255, 0.877);
     width: 350px;
-    height: 500px;
+    height: 520px;
     border-radius: 10px;
 
     display: flex;
@@ -28,9 +28,9 @@
 }
 
 .cont_imagen_medicina{
-    height: 72%;
-    min-height: 72%;
-    max-height: 72%;
+    height: 66%;
+    min-height: 66%;
+    max-height: 66%;
     border-radius: 10px;
     border: 1px solid gray;   
     width: 98%; 
@@ -66,7 +66,10 @@
 
 .caja_acciones{
     width: 98%;
-    text-align: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
 }
 
 .btn_sumar{

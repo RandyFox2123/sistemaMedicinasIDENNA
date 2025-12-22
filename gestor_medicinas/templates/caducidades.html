@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/caducidades.css' %}">
+    <title>{% block title %}Caducidades{%endblock%}</title>  
+{% endblock %}
+
+{% block body %}
+<main class="cont_principal">
+    <h1 class="titulo1_caducidad">Seguimiento de Caducidad</h1>
+    <div class="seccionador">
+        <form action="" method="GET" class="form">
+            <input type="text" name="q" placeholder="Buscar medicinas..." class="campo_buscar_medicina" value="{{ query|default:'' }}">
+            <button type="submit" class="boton_buscar">Buscar</button>
+        </form>
+    </div>
+
+    <div class="seccionador2">
+        <div class="tarjeta_info">
+            <p class="text_caduciran">
+                Caducaran pronto
+            </p>
+            {% for medicinas_iteradas in medicinas_proximas_a_caducar %}
+            <div class="medicina">
+                <p>{{medicinas_iteradas.medicina}}</p>
+                <p>
+                    Vencera en: 
+                    {% if medicinas_iteradas.dias_restantes == 0 %}
+                        <span class="text_venceran1">hoy</span>
+                    {% elif medicinas_iteradas.dias_restantes == 1 %}
+                        <span class="text_venceran1">1 día</span>
+                    {% elif medicinas_iteradas.dias_restantes %}
+                        <span class="text_venceran2">{{ medicinas_iteradas.dias_restantes }} días</span>  
+                    {% else %}
+                        sin fecha
+                    {% endif %}
+                </p>
+            </div>
+            {% empty %}
+            <div class="medicina">
+                <p>No se encontraron medicamentos próximos a caducar{% if query %} con "{{ query }}"{% endif %}.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="tarjeta_info2">
+            <p class="text_info1">Próximos a caducar</p>
+            <p class="numeroB contador">{{cantidad_medicinas_proximas_a_caducar}}</p>
+        </div>
+        
+        <div class="tarjeta_info2">
+            <p class="text_info1">Medicamentos caducados</p>
+            <p class="numero contador">{{ medicinas_caducadas }}</p>
+        </div>
+    </div>
+</main>
+
+<script src="{% static 'js/contadores.js' %}"></script>
+{% endblock %}

@@ -101,6 +101,13 @@
         </div>
 
         <div class="bloque_form_campos">
+            <div class="cont_campos">
+                <label for="fecha_caducidad">Fecha caducidad:</label>
+                <input type="date" id="fecha_caducidad" name="fecha_caducidad" required value="{{ medicina_obj.fecha_caducidad|date:'Y-m-d' }}" class="campo" required>
+            </div>
+        </div>
+
+        <div class="bloque_form_campos">
             <div class="cont_campos2">
                 <label for="descripcion">Descripcion:</label>
                 <textarea name="descripcion" class="campo_textarea" required>{{ medicina_obj.descripcion }}</textarea>

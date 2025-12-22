@@ -113,7 +113,16 @@
                          {{ medicina.cantidad }}
                     </p>
 
-                    {# IMPORTANTE: mantener la estructura y data-* COMO EN TU PLANTILLA ORIGINAL #}
+                    <p class="desc_medicina">
+                        <span class="span_desc_medicina">Caducado:</span>
+                        {% if medicina.caducado == True %}
+                            Si
+                        {% else %}
+                            No
+                        {% endif %}
+                    </p>
+
+
                     <div class="caja_acciones" style="display:flex; gap:10px;">
                         <button type="button" class="btn_sumar" 
                                 data-id="{{ medicina.id_medicina }}" 
@@ -130,7 +139,7 @@
                         {% else %}
                             <a href="{% url 'ver_medicina' medicina.id_medicina %}" class="btn_ver">
                         {% endif %}
-                            <img src="{% static 'img/ico_ver.png' %}" alt="icono" class="ico_boton">
+                            <img src="{% static 'img/ico_ver.webp' %}" alt="icono" class="ico_boton">
                         </a>
 
                         {% if filtros_qs %}
@@ -138,13 +147,13 @@
                         {% else %}
                             <a href="{% url 'edicion_medicina' medicina.id_medicina %}" class="btn_editar">
                         {% endif %}
-                            <img src="{% static 'img/ico_editar.png' %}" alt="icono" class="ico_boton">
+                            <img src="{% static 'img/ico_editar.webp' %}" alt="icono" class="ico_boton">
                         </a>
 
                         <button type="button" class="btn_borrar"
                                 data-id="{{ medicina.id_medicina }}"
                                 data-desc="{{ medicina.medicina }}">
-                                <img src="{% static 'img/ico_borrar.png' %}" alt="icono" class="ico_boton">
+                                <img src="{% static 'img/ico_borrar.webp' %}" alt="icono" class="ico_boton">
                         </button>
                     </div>
                 </div>

@@ -25,11 +25,15 @@
             <a href="{% url 'panel_principal' %}?page={{ request.GET.page }}&filtro_desc_medicina={{ request.GET.filtro_desc_medicina|urlencode }}&filtro_almacen={{ request.GET.filtro_almacen|urlencode }}" class="link">Home</a>
 
             <a href="{% url 'registrar_medicina' %}?page={{ request.GET.page }}&filtro_desc_medicina={{ request.GET.filtro_desc_medicina|urlencode }}&filtro_almacen={{ request.GET.filtro_almacen|urlencode }}" class="link">
-                Registrar medicina
+                Registrar
             </a>
 
             <a href="{% url 'generar_excel' %}?{{ filtros_qs }}" class="link">
             Generar Excel
+            </a>
+
+            <a href="{% url 'caducidades' %}" class="link">
+            Caducidades
             </a>
 
             <a href="{% url 'cerrar_seccion' %}" class="link">

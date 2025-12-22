@@ -1,0 +1,183 @@
+
+
+
+.cont_principal{
+    background-color: rgba(234, 245, 255, 0.918);
+    border: 2px solid rgb(135, 226, 214);
+    border-radius: 10px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    width: 80%;
+    padding: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.seccionador, .seccionador2{
+    background-color: rgba(255, 255, 255, 0.918);
+    border: 2px solid rgb(163, 209, 203);
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.titulo1_caducidad{
+    text-align: center;
+}
+
+.tarjeta_info, .tarjeta_info2{
+    border: 2px solid rgb(112, 201, 201);
+}
+
+.seccionador{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 15px;
+    justify-content: center;
+    width: 80%;
+
+}
+
+.form{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.campo_buscar_medicina{
+    width: 90%;
+    background-color: rgb(212, 242, 255);
+    border: 3px solid rgb(145, 174, 206);
+    border-radius: 5px;
+    padding: 5px;
+    outline: none;
+    cursor: pointer;
+}
+.campo_buscar_medicina:hover{
+    background-color: rgb(212, 242, 255);
+    border: 3px solid rgb(145, 174, 206);
+    box-shadow: 0px 0px 10px 2px rgb(135, 211, 255);
+    transition-duration: 0.6s;
+
+}
+
+
+.boton_buscar{
+    background-color: rgb(141, 16, 114);
+    border: 3px solid rgb(168, 35, 168);
+    padding: 4px;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.boton_buscar:hover{
+    background-color: rgb(199, 39, 164);
+    border: 3px solid rgb(194, 67, 194);
+    box-shadow: 0px 0px 10px 2px rgb(221, 11, 151);
+    transition-duration: 0.6s;
+
+}
+
+.seccionador2{
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 15px;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.tarjeta_info2{
+    width: 300px;
+    padding: 8px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+
+.tarjeta_info2{
+    height: auto;
+}
+
+.tarjeta_info{
+    width: 300px;
+    border-radius: 10px;
+    height: 400px;
+    padding: 8px;
+    text-align: center;
+    margin: 2px;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    gap: 5px;
+    overflow: hidden auto;
+}
+
+.text_info1{
+    text-align: center;
+    margin: 2px;
+    font-size: 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.numero, .numeroB{
+    margin: 2px;
+    text-align: center;
+
+    font-size: clamp(1rem, 5vw, 90vh);
+    font-weight: bold;
+    line-height: 1;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+}
+
+.numero{
+    color: rgb(172, 23, 72);
+}
+.numeroB{
+    color: rgb(255, 147, 23);
+}
+
+
+.medicina{
+    background-color: rgb(235, 249, 255);
+    border: 3px solid rgb(172, 190, 209);
+    border-radius: 5px;
+    width: 100%;
+    text-align: left;
+}
+
+p{
+    padding: 0px 4px;
+    margin: 2px;
+}
+
+.text_caduciran{
+    font-size: 18px;
+    color: rgb(172, 23, 72);
+    font-weight: bold;
+    
+}
+
+
+.text_venceran1{
+    color: red;
+}
+
+.text_venceran2{
+    color: rgb(156, 136, 18);
+}

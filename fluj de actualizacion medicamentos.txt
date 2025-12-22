@@ -1,0 +1,325 @@
+Ok, entonces vamos a ver si entendi, ola solucione s implementar una verificacion de los primeros 50 registros con sql diracta, esta mapeara la fecha de vencimiento
+de esos medicamentos solo los que tengan caducado=false y habra que buscar uan forma de de que a su vez si su vez al leer esos 50 registros si su fecha de caducidad
+es hoy o ya paso, se le cambien automaticamente a caducado=true, y asi sucesivamente con la paginacion
+
+"la verdad la actualizacion no sera muyfrecuente porque los mediamentos suelen vencer en un periodo de un año"
+
+Por otra parte, al ver o editar un medicamento se puydiera implemnetar este mecanismo de actualziacion peor mas breve, porque solo se debe verificar la fecha de
+caducidad del medicamento no de todos, ya por esta parte estariamos cubriendo aca
+
+Por ultimo se puede implementar un mecanismo que mapee todos los registros por ejemplo a las 1:00 am buscando por sql solo los medicamentos que tengan por estado
+caducado false, y si hay alguno que se escapo porque el rango de la vista dle panel no lo pudo cubrir, este mecanismo lo hara y asi aseguramos de que siempre se mantenga
+vigente todo, que te parece
+
+
+Entonces, establescamos las tareas:
+
+
+Panel de registros:
+Funcionalidad con SQL consultando de manera directa los primeros 50 registros por su campo caducado = false si encuentra alguno o algunos que la fecha se hoy
+o que ya haiga pasado, debe cambairla actomaticamente a caducado = True.
+
+
+Editar y Ver,
+Al consultar un registor bien sea, implementar este mecanismo de verificacion pero solo con el medicamento consultado, no con todos y si la fecha de caducidad
+es hoy o ya paso cambiar utomaticamente a caducad = true
+
+
+Funcionalidad de cobertura a las 1:00 am
+Y para asegurarnos de cubrir todo, una funcionalidad interna que se ejecute a las 1:00 am que escane todos los medicamentyos que tengan caducado =  false
+y verique sus fechas, si es hoy o ha psado, entonces que a esos medicamentos se les cambien el estado a caducado = true
+
+Y asi con estas 3 capaz cubririamos todo
+
+
+
+
+PROCEDAMOS:
+
+MODELOS:
+class Ubicacion(models.Model):
+    id_ubicacion = models.AutoField(primary_key=True)
+    desc_ubicacion = models.CharField(max_length=400, default="No indica", validators=[MinLengthValidator(2)])
+    estado = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.desc_ubicacion
+
+    class Meta:
+        db_table = 'ubicaciones'
+
+
+def imagen_ruta(instance, filename):
+    return f'{instance.id_medicina}/{filename}'
+
+
+class Presentacion_Medicamento(models.Model):
+    id_presentacion_medicamento = models.AutoField(primary_key=True)
+    desc_presentacion_medicamento = models.CharField(default="No indica", max_length=350, validators=[MinLengthValidator(2)])
+    
+    def __str__(self):
+        return self.desc_presentacion_medicamento
+
+    class Meta:
+        db_table = 'presentaciones_medicamentos'
+
+
+class Medicina(models.Model):
+    id_medicina = models.AutoField(primary_key=True)
+    imagen_medicina = models.ImageField(upload_to=imagen_ruta, null=True, blank=True)
+    medicina = models.CharField(max_length=400, null=False, blank=False, default="No indica", validators=[MinLengthValidator(2)])
+    presentacion = models.ForeignKey(Presentacion_Medicamento, on_delete=models.PROTECT, null=False, related_name="fk_presentacion_medicamento")
+
+    cantidad = models.IntegerField(default=0, null=False, validators=[MaxValueValidator(100000),  MinValueValidator(0)])
+
+    laboratorio = models.CharField(max_length=350, null=True, default="No indica", validators=[MinLengthValidator(2)])
+
+    ubicacion = models.ForeignKey(Ubicacion, on_delete=models.PROTECT, null=False, related_name="fk_ubicacion")
+
+    anaquel = models.CharField(max_length=100, default="No indica", validators=[MinLengthValidator(1)])
+
+    descripcion = models.TextField(max_length=800, null=False, blank=False)
+    observaciones = models.TextField(max_length=800, null=True, blank=True)
+
+    creador_del_registro = models.CharField(max_length=350, null=False, blank=False, default="No indica",  validators=[MinLengthValidator(2)])
+
+    historial_edicion = models.TextField(null=False, blank=False, default="Nadie")
+
+    fecha_registro = models.DateField(null=False, blank=False)
+    """
+        Campos nuevos, no permitir nulo y en blanco despues de que se lleven
+        todos los registros oficiales.
+    """
+    fecha_caducidad = models.DateField(null=True, blank=True, default=None)
+    caducado = models.BooleanField(default=False, blank=False, null=False)
+    autor_registro = models.CharField(max_length=350, blank=True, null=True,  default=None)
+
+    def __str__(self):
+        return f"{self.medicina} de {self.laboratorio}"
+
+    class Meta:
+        db_table = 'medicinas'
+
+    def delete(self, using=None, keep_parents=False):
+        if self.imagen_medicina:
+            if os.path.isfile(self.imagen_medicina.path):
+                os.remove(self.imagen_medicina.path)
+        super().delete(using=using, keep_parents=keep_parents)
+
+
+    def verificar_caducidad(self):
+        if self.fecha_caducidad and self.fecha_caducidad < timezone.now().date():
+            self.caducado = True
+            self.save(update_fields=['caducado'])
+    
+
+
+VISTAS: 
+
+
+@login_required
+@require_safe
+def panel_principal(request):
+    ubicaciones_activas = Ubicacion.objects.filter(estado=True)
+    presentaciones_activas = Presentacion_Medicamento.objects.all()
+
+    filtro_medicina = request.GET.get('filtro_medicina', '').strip()
+    filtro_ubicacion_id = request.GET.get('filtro_ubicacion', '').strip()
+    filtro_presentacion_id = request.GET.get('filtro_presentacion', '').strip()
+    fecha_desde = request.GET.get('fecha_desde', '').strip()
+    fecha_hasta = request.GET.get('fecha_hasta', '').strip()
+    page_num = request.GET.get('page', 1)
+
+    medicinas_qs = Medicina.objects.filter(ubicacion__estado=True)
+
+
+    if filtro_medicina:
+        medicinas_qs = medicinas_qs.filter(medicina__icontains=filtro_medicina)
+
+
+    if filtro_ubicacion_id.isdigit():
+        medicinas_qs = medicinas_qs.filter(ubicacion_id=int(filtro_ubicacion_id))
+
+
+    if filtro_presentacion_id.isdigit():
+        medicinas_qs = medicinas_qs.filter(presentacion_id=int(filtro_presentacion_id))
+
+
+    if fecha_desde:
+        medicinas_qs = medicinas_qs.filter(fecha_registro__gte=fecha_desde)
+    if fecha_hasta:
+        medicinas_qs = medicinas_qs.filter(fecha_registro__lte=fecha_hasta)
+
+    medicinas_qs = medicinas_qs.order_by('-id_medicina')
+
+
+    paginator = Paginator(medicinas_qs, 3)
+    page_obj = paginator.get_page(page_num)
+
+
+    for medicina in page_obj:
+        if medicina.imagen_medicina and medicina.imagen_medicina.name:
+            ruta_imagen = os.path.join(settings.MEDIA_ROOT, medicina.imagen_medicina.name)
+            medicina.imagen_existe = os.path.isfile(ruta_imagen)
+        else:
+            medicina.imagen_existe = False
+
+  
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        get_params.pop('page')
+    filtros_qs = get_params.urlencode() 
+
+    contexto = {
+        'page_obj': page_obj,
+        'ubicaciones_activas': ubicaciones_activas,
+        'presentaciones_activas': presentaciones_activas,
+        'filtro_medicina': filtro_medicina,
+        'filtro_ubicacion_id': filtro_ubicacion_id,
+        'filtro_presentacion_id': filtro_presentacion_id,
+        'fecha_desde': fecha_desde,
+        'fecha_hasta': fecha_hasta,
+        'filtros_qs': filtros_qs,
+    }
+    return render(request, 'panel_principal.html', contexto)
+
+
+@manejo_errores
+@login_required
+@require_safe
+def ver_medicina(request, id_medicina):
+    medicina_consultada = get_object_or_404(Medicina, pk=id_medicina)
+    ubicaciones_activas = Ubicacion.objects.filter(estado=True)
+    presentaciones = Presentacion_Medicamento.objects.all()
+
+    contexto = {"medicina_consultada":medicina_consultada, "ubicaciones":ubicaciones_activas, "presentaciones":presentaciones}
+    return render(request, 'ver_medicina.html', contexto)
+
+
+
+@manejo_errores
+@login_required
+@require_http_methods(["GET", "POST"])
+def editar_medicina(request, id_medicina):
+    medicina_obj = get_object_or_404(Medicina, pk=id_medicina)
+    ubicaciones = Ubicacion.objects.filter(estado=True)
+    presentaciones = Presentacion_Medicamento.objects.all()
+
+    if request.method == 'POST':
+        # Obtener los datos del formulario
+        desc_medicina = request.POST.get('medicina', '').strip()
+        presentacion_id = request.POST.get('presentacion')
+        ubicacion_id = request.POST.get('ubicacion')
+        nueva_imagen = request.FILES.get('imagen_medicina')
+        cantidad_str = request.POST.get('cantidad', '').strip()
+        laboratorio = request.POST.get('laboratorio', '').strip()
+        anaquel = request.POST.get('anaquel', '').strip()
+        descripcion = request.POST.get('descripcion', '').strip()
+        observaciones = request.POST.get('observaciones', '').strip()
+
+        """
+        if medicina_obj.medicina.lower() != desc_medicina.lower():
+            if Medicina.objects.filter(medicina__iexact=desc_medicina).exclude(pk=medicina_obj.pk).exists():
+                raise error_contexto("Ya existe una medicina con esta descripción.")
+
+        if not desc_medicina:
+            raise error_contexto("La descripción es obligatoria.")
+        
+        """
+
+
+        if not cantidad_str.isdigit():
+            raise error_contexto("La cantidad debe ser un número entero válido.")
+        cantidad = int(cantidad_str)
+        if cantidad < 0 or cantidad > 100000:
+            raise error_contexto("La cantidad debe estar entre 0 y 100000.")
+
+        ubicacion_obj = None
+        if ubicacion_id and ubicacion_id.isdigit():
+            ubicacion_obj = Ubicacion.objects.filter(pk=int(ubicacion_id), estado=True).first()
+
+        presentacion_obj = None
+        if presentacion_id and presentacion_id.isdigit():
+            presentacion_obj = Presentacion_Medicamento.objects.filter(pk=int(presentacion_id)).first()
+
+        if nueva_imagen:
+            if medicina_obj.imagen_medicina and os.path.isfile(medicina_obj.imagen_medicina.path):
+                os.remove(medicina_obj.imagen_medicina.path)
+            medicina_obj.imagen_medicina = nueva_imagen
+
+
+        """
+        historial_modificaciones = 
+                    creador_del_registro=request.user.username if request.user.is_authenticated else 'Anonimo',
+            historial_edicion='Nadie',
+            fecha_registro=date.today()
+        
+        bien_a_mover.historial_movimientos = historial_movimientos_actual + f" -> {desc_nueva_ubicacion_bien}"
+        """
+
+        nuevo_historial_edicion = f"{date.today()} : {request.user.username}"
+
+        medicina_obj.medicina = desc_medicina
+        medicina_obj.presentacion = presentacion_obj
+        medicina_obj.ubicacion = ubicacion_obj
+        medicina_obj.cantidad = cantidad
+        medicina_obj.laboratorio = laboratorio
+        medicina_obj.anaquel = anaquel
+        medicina_obj.descripcion = descripcion
+        medicina_obj.historial_edicion = medicina_obj.historial_edicion + f",  {nuevo_historial_edicion}"
+        medicina_obj.observaciones = observaciones
+        medicina_obj.save()
+
+        url_redireccion = request.session.get('url_panel_principal', reverse('panel_principal'))
+        return HttpResponseRedirect(url_redireccion)
+
+    contexto = {
+        'medicina_obj': medicina_obj,
+        'ubicaciones_activas': ubicaciones,
+        'presentaciones': presentaciones,
+    }
+    return render(request, 'editar_medicina.html', contexto)
+
+
+Recuerda que el paneld e registos debe mostrar tanto medicinas vencidas, como no vencidas y otra cosa, lo puedes hacer con otro nombre mas descriptivo
+por ejemplo en vez de 
+
+  def save(self, *args, **kwargs):
+        from django.utils import timezone
+        hoy = timezone.now().date()
+        if self.fecha_caducidad and self.fecha_caducidad <= hoy:
+            self.caducado = True
+        super().save(*args, **kwargs)
+
+
+
+  def caducir(self, *args, **kwargs):
+        from django.utils import timezone
+        hoy = timezone.now().date()
+        if self.fecha_caducidad and self.fecha_caducidad <= hoy:
+            self.caducado = True
+        super().save(*args, **kwargs)
+
+
+
+
+
+
+
+<!-- DENTRO del loop {% for medicina in page_obj %} -->
+<div class="info_medicina">
+    <!-- ... tus otros campos ... -->
+    
+    <!-- 🟢 NUEVO: Estado caducidad -->
+    <p class="desc_medicina {% if medicina.estado_caducado_sql %}text-danger fw-bold{% endif %}">
+        <span class="span_desc_medicina">Estado:</span>
+        {{ medicina.estado_caducado_sql|yesno:"CADUCADO,Activo" }}
+    </p>
+    
+    <p class="desc_medicina">
+        <span class="span_desc_medicina">Fecha caducidad:</span>
+        {{ medicina.fecha_caducidad|date:"d/m/Y"|default:"Sin fecha" }}
+    </p>
+    
+    <!-- ... resto de tu código ... -->
+</div>

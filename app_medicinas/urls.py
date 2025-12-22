@@ -20,6 +20,7 @@ urlpatterns = [
     path('borrar_medicina/<int:id_medicina>', views.borrar_medicina, name='borrar_medicina'),
     path('sumar_medicina/<int:id_medicina>', views.sumar_cantidad_medicina, name='sumar_medicina'),
     path('restar_medicina/<int:id_medicina>', views.restar_cantidad_medicina, name='restar_medicina'),
+    path('caducidades/', views.caducidades, name='caducidades'),
 
     #Otros
     path('generar_excel/', views.generar_excel, name='generar_excel')
