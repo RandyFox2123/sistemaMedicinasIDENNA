@@ -8,116 +8,158 @@
 
 {% block body %}
 <main>
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <form method="post" enctype="multipart/form-data" class="form">
         {% csrf_token %}
         <h1 class="titulo2">Editar Medicina</h1>
+        
         {% if medicina_obj.imagen_medicina %}
             <div class="contenedor_campo_img">
                 <img src="{{ medicina_obj.imagen_medicina.url }}" alt="Imagen medicina" class="imagen_juguete" id="imagenPreview">
             </div>
-        {% else %}
-            <img src="" alt="Imagen medicina" class="imagen_juguete" id="imagenPreview" style="display:none;">
         {% endif %}
 
-        <div class="bloque_form_campos2">
-            <label for="imagen_medicina" class="custom-file-upload">Cambiar imagen</label>
+        <div class="contenedor_campo_img">
+            <label for="{{ form.imagen_medicina.id_for_label }}" class="custom-file-upload">
+                Cambiar imagen {% if form.imagen_medicina.field.required %}*{% endif %}
+            </label>
 
-            <input type="file" id="imagen_medicina" name="imagen_medicina" accept="image/*" class="boton_imagen">
+            <p class="PVM">{{ form.imagen_medicina }}</p>
+            
             <span id="nombre_imagen">Ninguna imagen seleccionada</span>
-        </div>
-    
-        <script>
-            const inputImagen = document.getElementById('imagen_medicina');
-            const spanNombre = document.getElementById('nombre_imagen');
-            const imagenPreview = document.getElementById('imagenPreview');
-
-            inputImagen.addEventListener('change', function() {
-                if (this.files && this.files.length > 0) {
-                    // Mostrar nombre del archivo
-                    spanNombre.textContent = this.files[0].name;
-
-                    // Leer la imagen y mostrarla
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        imagenPreview.src = e.target.result;
-                        imagenPreview.style.display = 'block'; // asegurar que se muestre
-                    }
-                    reader.readAsDataURL(this.files[0]);
-                } else {
-                    spanNombre.textContent = 'Ninguna imagen seleccionada';
-                    // Opcional: volver a mostrar la imagen original si quieres
-                    // Si quieres que vuelva a la original, puedes guardar su src al cargar la página
-                }
-            });
-        </script>
-
-        
-        <div class="bloque_form_campos">
-            <div class="cont_campos">
-                <label for="medicina">Medicina:</label>
-                <input type="text" id="medicina" name="medicina" maxlength="400" minlength="3" value="{{ medicina_obj.medicina }}" required class="campo">
-            </div>
-
-            <div class="cont_campos">
-                <label for="presentacion">Presentacion:</label>
-                <select name="presentacion" class="campo" required>
-                    {% for presentacion in presentaciones %}
-                        <option value="{{ presentacion.id_presentacion_medicamento }}" {% if presentacion.id_presentacion_medicamento == medicina_obj.presentacion.id_presentacion_medicamento %}selected{% endif %}>
-                            {{ presentacion.desc_presentacion_medicamento }}
-                        </option>
+            {% if form.imagen_medicina.errors %}
+                <div class="errores">
+                    {% for error in form.imagen_medicina.errors %}
+                        <span class="errorSpan">{{ error }}</span>
                     {% endfor %}
-                </select>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="bloque_form_campos">
+            <div class="cont_campos">
+                <label for="{{ form.medicina.id_for_label }}">Medicina:</label>
+                {{ form.medicina }}
+                {% if form.medicina.errors %}
+                    <div class="errores">
+                        {% for error in form.medicina.errors %}
+                            <span class="errorSpan">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="cont_campos">
+                <label for="{{ form.presentacion.id_for_label }}">Presentacion:</label>
+                {{ form.presentacion }}
+                {% if form.presentacion.errors %}
+                    <div class="errores">
+                        {% for error in form.presentacion.errors %}
+                            <span class="errorSpan">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
         </div>
 
         <div class="bloque_form_campos">
             <div class="cont_campos">
-                <label for="cantidad">Cantidad:</label>
-                <input type="number" id="cantidad" name="cantidad" min="0" max="100000" value="{{ medicina_obj.cantidad }}" required class="campo">
+                <label for="{{ form.cantidad.id_for_label }}">Cantidad:</label>
+                {{ form.cantidad }}
+                {% if form.cantidad.errors %}
+                    <div class="errores">
+                        {% for error in form.cantidad.errors %}
+                            <span class="errorSpan">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             <div class="cont_campos">
-                <label for="laboratorio">Laboratorio:</label>
-                <input type="text" id="laboratorio" name="laboratorio" maxlength="350" value="{{ medicina_obj.laboratorio }}" required class="campo">
-            </div>
-        </div>
-
-        <div class="bloque_form_campos">
-            <div class="cont_campos">
-                <label for="ubicacion">Ubicacion:</label>
-                <select name="ubicacion" class="campo" required>
-                    {% for ubicacion_leida in ubicaciones_activas %}
-                        <option value="{{ ubicacion_leida.id_ubicacion }}" {% if ubicacion_leida.id_ubicacion == medicina_obj.ubicacion.id_ubicacion %}selected{% endif %}>
-                            {{ ubicacion_leida.desc_ubicacion }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="cont_campos">
-                <label for="anaquel">Anaquel:</label>
-                <input type="text" id="anaquel" name="anaquel" maxlength="100" value="{{ medicina_obj.anaquel }}" required class="campo">
+                <label for="{{ form.laboratorio.id_for_label }}">Laboratorio:</label>
+                {{ form.laboratorio }}
+                {% if form.laboratorio.errors %}
+                    <div class="errores">
+                        {% for error in form.laboratorio.errors %}
+                            <span class="errorSpan">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
         </div>
 
         <div class="bloque_form_campos">
             <div class="cont_campos">
-                <label for="fecha_caducidad">Fecha caducidad:</label>
-                <input type="date" id="fecha_caducidad" name="fecha_caducidad" required value="{{ medicina_obj.fecha_caducidad|date:'Y-m-d' }}" class="campo" required>
+                <label for="{{ form.ubicacion.id_for_label }}">Ubicacion:</label>
+                {{ form.ubicacion }}
+                {% if form.ubicacion.errors %}
+                    <div class="errores">
+                        {% for error in form.ubicacion.errors %}
+                            <span class="errorSpan">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="cont_campos">
+                <label for="{{ form.anaquel.id_for_label }}">Anaquel:</label>
+                {{ form.anaquel }}
+                {% if form.anaquel.errors %}
+                    <div class="errores">
+                        {% for error in form.anaquel.errors %}
+                            <span class="errorSpan">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="bloque_form_campos">
+            <div class="cont_campos">
+                <label for="{{ form.fecha_caducidad.id_for_label }}">Fecha caducidad:</label>
+                {{ form.fecha_caducidad }}
+                {% if form.fecha_caducidad.errors %}
+                    <div class="errores">
+                        {% for error in form.fecha_caducidad.errors %}
+                            <span class="errorSpan">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
         </div>
 
         <div class="bloque_form_campos">
             <div class="cont_campos2">
-                <label for="descripcion">Descripcion:</label>
-                <textarea name="descripcion" class="campo_textarea" required>{{ medicina_obj.descripcion }}</textarea>
+                <label for="{{ form.descripcion.id_for_label }}">Descripcion:</label>
+                {{ form.descripcion }}
+                {% if form.descripcion.errors %}
+                    <div class="errores">
+                        {% for error in form.descripcion.errors %}
+                            <span class="errorSpan">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
         </div>
 
         <div class="bloque_form_campos">
             <div class="cont_campos2">
-                <label for="observaciones">Observaciones:</label>
-                <textarea name="observaciones" class="campo_textarea">{{ medicina_obj.observaciones }}</textarea>
+                <label for="{{ form.observaciones.id_for_label }}">Observaciones:</label>
+                {{ form.observaciones }}
+                {% if form.observaciones.errors %}
+                    <div class="errores">
+                        {% for error in form.observaciones.errors %}
+                            <span class="errorSpan">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
         </div>
 
@@ -127,5 +169,29 @@
         </div>
     </form>
 
+    <script>
+        const inputImagen = document.getElementById('{{ form.imagen_medicina.id_for_label }}');
+        const spanNombre = document.getElementById('nombre_imagen');
+        const imagenPreview = document.getElementById('imagenPreview');
+        
+        if (inputImagen && spanNombre) {
+            inputImagen.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    spanNombre.textContent = this.files[0].name;
+                    
+                    if (imagenPreview) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            imagenPreview.src = e.target.result;
+                            imagenPreview.style.display = 'block';
+                        }
+                        reader.readAsDataURL(this.files[0]);
+                    }
+                } else {
+                    spanNombre.textContent = 'Ninguna imagen seleccionada';
+                }
+            });
+        }
+    </script>
 </main>
 {% endblock %}

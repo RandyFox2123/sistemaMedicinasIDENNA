@@ -3,7 +3,7 @@
 
 {% block head %}
     <link rel="stylesheet" href="{% static 'css/caducidades.css' %}">
-    <title>{% block title %}Caducidades{%endblock%}</title>  
+    <title>{% block title %}Caducidades{% endblock %}</title>
 {% endblock %}
 
 {% block body %}
@@ -17,38 +17,77 @@
     </div>
 
     <div class="seccionador2">
-        <div class="tarjeta_info">
-            <p class="text_caduciran">
-                Caducaran pronto
-            </p>
-            {% for medicinas_iteradas in medicinas_proximas_a_caducar %}
-            <div class="medicina">
-                <p>{{medicinas_iteradas.medicina}}</p>
-                <p>
-                    Vencera en: 
-                    {% if medicinas_iteradas.dias_restantes == 0 %}
-                        <span class="text_venceran1">hoy</span>
-                    {% elif medicinas_iteradas.dias_restantes == 1 %}
-                        <span class="text_venceran1">1 día</span>
-                    {% elif medicinas_iteradas.dias_restantes %}
-                        <span class="text_venceran2">{{ medicinas_iteradas.dias_restantes }} días</span>  
-                    {% else %}
-                        sin fecha
+        <div class="contSuperiorListadoMedicinas">
+            <div class="paginadorListadoMedicinas">
+                <p>Paginador</p>
+                {% if page_obj.has_previous or page_obj.has_next %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?q={{ query }}&page={{ page_obj.previous_page_number }}" class="anteriorPag">Anterior</a>
                     {% endif %}
-                </p>
+
+                    {% if page_obj.number > 3 %}
+                        <a href="?q={{ query }}&page=1">1</a>
+                        {% if page_obj.number > 4 %}
+                            ... 
+                        {% endif %}
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                            {% if num == page_obj.number %}
+                                ({{ num }})
+                            {% else %}
+                                <a href="?q={{ query }}&page={{ num }}">{{ num }}</a>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+                        {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                            ... 
+                        {% endif %}
+                        <a href="?q={{ query }}&page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                    {% endif %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?q={{ query }}&page={{ page_obj.next_page_number }}" class="siguientePag">Siguiente</a>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
-            {% empty %}
-            <div class="medicina">
-                <p>No se encontraron medicamentos próximos a caducar{% if query %} con "{{ query }}"{% endif %}.</p>
+
+            <div class="tarjeta_info">
+                <p class="text_caduciran">Caducaran pronto</p>
+                {% for medicinas_iteradas in medicinas_proximas_a_caducar %}
+                <div class="medicina">
+                    <p>{{ medicinas_iteradas.medicina }}</p>
+                    <p>
+                        Vencera en:
+                        {% if medicinas_iteradas.dias_restantes == 0 %}
+                            <span class="text_venceran1">hoy</span>
+                        {% elif medicinas_iteradas.dias_restantes == 1 %}
+                            <span class="text_venceran1">1 día</span>
+                        {% elif medicinas_iteradas.dias_restantes %}
+                            <span class="text_venceran2">{{ medicinas_iteradas.dias_restantes }} días</span>
+                        {% else %}
+                            sin fecha
+                        {% endif %}
+                    </p>
+                </div>
+                {% empty %}
+                <div class="medicina">
+                    <p>No se encontraron medicamentos próximos a caducar{% if query %} con "{{ query }}"{% endif %}.</p>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
 
         <div class="tarjeta_info2">
             <p class="text_info1">Próximos a caducar</p>
-            <p class="numeroB contador">{{cantidad_medicinas_proximas_a_caducar}}</p>
+            <p class="numeroB contador">{{ cantidad_medicinas_proximas_a_caducar }}</p>
         </div>
-        
+
         <div class="tarjeta_info2">
             <p class="text_info1">Medicamentos caducados</p>
             <p class="numero contador">{{ medicinas_caducadas }}</p>

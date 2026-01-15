@@ -206,3 +206,13 @@ input[type="file"] {
     transition-duration: 0.4s;
 }
 
+
+.errorSpan{
+    color:rgb(209, 70, 105);
+}
+
+.PVM{
+    display: none;
+}
+
+

@@ -21,6 +21,7 @@ from django.utils import timezone
 from datetime import datetime
 from datetime import timedelta
 from django.db.models import Q
+from .forms import MedicinaForm
 
 
 
@@ -117,10 +118,10 @@ def index(request):
     return render(request, 'index.html')
 
 
-@login_required
+
+@manejo_errores
 @require_safe
 @login_required
-@require_safe
 def panel_principal(request):
     ubicaciones_activas = Ubicacion.objects.filter(estado=True)
     presentaciones_activas = Presentacion_Medicamento.objects.all()
@@ -133,7 +134,7 @@ def panel_principal(request):
     page_num = request.GET.get('page', 1)
 
     medicinas_qs = Medicina.objects.filter(ubicacion__estado=True).annotate(
-        estado_caducado_sql=Case(  # ← NOMBRE ÚNICO ✅
+        estado_caducado_sql=Case(
             When(
                 fecha_caducidad__isnull=False,
                 fecha_caducidad__lte=timezone.now().date(),
@@ -213,85 +214,25 @@ def ver_medicina(request, id_medicina):
 def registrar_medicina(request):
     ubicaciones_activas = Ubicacion.objects.filter(estado=True)
     presentaciones = Presentacion_Medicamento.objects.all()
-
-    if request.method == 'POST':
-        desc_medicina = request.POST.get('medicina', '').strip()
-        presentacion_id = request.POST.get('medida')
-        imagen = request.FILES.get('imagen_medicina')
-        cantidad_str = request.POST.get('cantidad', '0').strip()
-        laboratorio = request.POST.get('laboratorio', '').strip()
-        ubicacion_id = request.POST.get('ubicacion')
-        anaquel = request.POST.get('anaquel', '').strip()
-
-        fecha_caducidad_str = request.POST.get('fecha_caducidad', '')
-        if fecha_caducidad_str:
-            try:
-                fecha_caducidad = datetime.strptime(fecha_caducidad_str, '%Y-%m-%d').date()
-
-            except ValueError:
-                raise error_contexto("Formato de fecha inválido. Use YYYY-MM-DD")
-        else:
-            fecha_caducidad = None
-
-        descripcion = request.POST.get('descripcion', '').strip()
-        observaciones = request.POST.get('observacion', '').strip()
-
-        """
-        if Medicina.objects.filter(medicina__iexact=desc_medicina).exists():
-            raise error_contexto("Ya existe una medicina con esta descripcion.")
-        """
-
-        if not desc_medicina:
-            raise error_contexto("La descripcion es obligatoria.")
-
     
-        presentacion_obj = None
-        if presentacion_id and presentacion_id.isdigit():
-            presentacion_obj = Presentacion_Medicamento.objects.filter(pk=int(presentacion_id)).first()
-        if not presentacion_obj:
-            raise error_contexto("Selecciona una presentación válida.")
-
-
-        ubicacion_obj = None
-        if ubicacion_id and ubicacion_id.isdigit():
-            ubicacion_obj = Ubicacion.objects.filter(pk=int(ubicacion_id), estado=True).first()
-        if not ubicacion_obj:
-            raise error_contexto("Selecciona una ubicación válida.")
-
-        try:
-            cantidad = float(cantidad_str.replace(',', '.'))
-            if cantidad < 0 or cantidad > 100000:
-                raise error_contexto("La cantidad debe ser un número entre 0 y 100000.")
-        except ValueError:
-            raise error_contexto("La cantidad debe ser un número válido.")
-
-
-        nueva_medicina = Medicina(
-            medicina=desc_medicina,
-            presentacion=presentacion_obj,
-            cantidad=int(cantidad),
-            laboratorio=laboratorio,
-            ubicacion=ubicacion_obj,
-            anaquel=anaquel,
-            descripcion=descripcion,
-            observaciones=observaciones,
-            creador_del_registro=request.user.username if request.user.is_authenticated else 'Anonimo',
-            historial_edicion='Nadie',
-            fecha_caducidad=fecha_caducidad,
-            fecha_registro=date.today()
-        )
-
-        if imagen:
-            nueva_medicina.imagen_medicina = imagen
-
-        nueva_medicina.save()
-        nueva_medicina.caducir()
-
-        #url_redireccion = request.session.get('url_panel_principal', reverse('panel_principal'))
-        #return redirect(url_redireccion)
-        return redirect('panel_principal')
-
-    return render(request, 'registrar_medicina.html', {'ubicaciones_activas': ubicaciones_activas, 'presentaciones': presentaciones})
+    if request.method == 'POST':
+        formulario = MedicinaForm(request.POST, request.FILES)
+        if formulario.is_valid():
+            medicina = formulario.save(commit=False)
+            medicina.creador_del_registro = request.user.username
+            medicina.historial_edicion = 'Nadie'
+            medicina.fecha_registro = date.today()
+            medicina.save()
+            medicina.caducir()
+            return redirect('panel_principal')
+    else:
+        formulario = MedicinaForm()
+    
+    return render(request, 'registrar_medicina.html', {
+        'form': formulario,
+        'ubicaciones_activas': ubicaciones_activas, 
+        'presentaciones': presentaciones
+    })
 
 
 @manejo_errores
@@ -302,66 +243,24 @@ def editar_medicina(request, id_medicina):
     medicina_obj.caducir()
     ubicaciones = Ubicacion.objects.filter(estado=True)
     presentaciones = Presentacion_Medicamento.objects.all()
-
+    
     if request.method == 'POST':
-        desc_medicina = request.POST.get('medicina', '').strip()
-        presentacion_id = request.POST.get('presentacion')
-        ubicacion_id = request.POST.get('ubicacion')
-        nueva_imagen = request.FILES.get('imagen_medicina')
-        cantidad_str = request.POST.get('cantidad', '').strip()
-        laboratorio = request.POST.get('laboratorio', '').strip()
-        anaquel = request.POST.get('anaquel', '').strip()
-        descripcion = request.POST.get('descripcion', '').strip()
-
-        observaciones = request.POST.get('observaciones', '').strip()
-        fecha_caducidad_str = request.POST.get('fecha_caducidad', '')
-        if fecha_caducidad_str:
-            try:
-                fecha_caducidad = datetime.strptime(fecha_caducidad_str, '%Y-%m-%d').date()
-
-            except ValueError:
-                raise error_contexto("Formato de fecha inválido. Use YYYY-MM-DD")
-        else:
-            fecha_caducidad = None
-
-        if not cantidad_str.isdigit():
-            raise error_contexto("La cantidad debe ser un número entero válido.")
-        cantidad = int(cantidad_str)
-        if cantidad < 0 or cantidad > 100000:
-            raise error_contexto("La cantidad debe estar entre 0 y 100000.")
-
-        ubicacion_obj = None
-        if ubicacion_id and ubicacion_id.isdigit():
-            ubicacion_obj = Ubicacion.objects.filter(pk=int(ubicacion_id), estado=True).first()
-
-        presentacion_obj = None
-        if presentacion_id and presentacion_id.isdigit():
-            presentacion_obj = Presentacion_Medicamento.objects.filter(pk=int(presentacion_id)).first()
-
-        if nueva_imagen:
-            if medicina_obj.imagen_medicina and os.path.isfile(medicina_obj.imagen_medicina.path):
-                os.remove(medicina_obj.imagen_medicina.path)
-            medicina_obj.imagen_medicina = nueva_imagen
-
-        nuevo_historial_edicion = f"{date.today()} : {request.user.username}"
-        medicina_obj.medicina = desc_medicina
-        medicina_obj.presentacion = presentacion_obj
-        medicina_obj.ubicacion = ubicacion_obj
-        medicina_obj.cantidad = cantidad
-        medicina_obj.laboratorio = laboratorio
-        medicina_obj.anaquel = anaquel
-        medicina_obj.descripcion = descripcion
-        medicina_obj.historial_edicion = medicina_obj.historial_edicion + f",  {nuevo_historial_edicion}"
-        medicina_obj.fecha_caducidad = fecha_caducidad
-        medicina_obj.observaciones = observaciones
+        form = MedicinaForm(request.POST, request.FILES, instance=medicina_obj) 
+        if form.is_valid():
+            medicina = form.save(commit=False)
+            nuevo_historial_edicion = f"{date.today()} : {request.user.username}"
+            medicina.historial_edicion = medicina.historial_edicion + f", {nuevo_historial_edicion}"
+            
+            medicina.save()
+            medicina.caducir()
+            
+            url_redireccion = request.session.get('url_panel_principal', reverse('panel_principal'))
+            return HttpResponseRedirect(url_redireccion)
+    else:
+        form = MedicinaForm(instance=medicina_obj)
         
-        medicina_obj.save()
-        medicina_obj.caducir()
-        
-        url_redireccion = request.session.get('url_panel_principal', reverse('panel_principal'))
-        return HttpResponseRedirect(url_redireccion)
-
     contexto = {
+        'form': form, 
         'medicina_obj': medicina_obj,
         'ubicaciones_activas': ubicaciones,
         'presentaciones': presentaciones,
@@ -369,14 +268,12 @@ def editar_medicina(request, id_medicina):
     return render(request, 'editar_medicina.html', contexto)
 
 
+
 @manejo_errores
 @login_required
 @require_POST
 def borrar_medicina(request, id_medicina):
     medicina_obj = get_object_or_404(Medicina, pk=id_medicina)
-    if medicina_obj.imagen_medicina and os.path.isfile(medicina_obj.imagen_medicina.path):
-        os.remove(medicina_obj.imagen_medicina.path)
-
     medicina_obj.delete()
 
     url_redireccion = request.session.get('url_panel_principal', reverse('panel_principal'))
@@ -427,6 +324,10 @@ def restar_cantidad_medicina(request, id_medicina):
     return HttpResponseRedirect(url_redireccion)
 
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+
+
 @manejo_errores
 @login_required
 @require_safe
@@ -435,41 +336,49 @@ def caducidades(request):
     en_30_dias = hoy + timedelta(days=30)
     hoy_str = str(hoy)
     medicinas_caducadas = Medicina.objects.filter(caducado=True).count()
+
+    query = request.GET.get('q', '')
+    page_number = request.GET.get('page', 1)
+
     medicinas_proximas_a_caducar = Medicina.objects.filter(
         Q(caducado__isnull=True) | Q(caducado=False),
         fecha_caducidad__isnull=False,             
         fecha_caducidad__range=[hoy, en_30_dias]
     ).order_by('fecha_caducidad')
 
-    query = request.GET.get('q', '')
     if query:
-        medicinas_filtradas = medicinas_proximas_a_caducar.filter(
+        medicinas_proximas_a_caducar = medicinas_proximas_a_caducar.filter(
             medicina__icontains=query
         )
-    else:
-        medicinas_filtradas = medicinas_proximas_a_caducar
 
-    for med in medicinas_filtradas:
+
+    paginator = Paginator(medicinas_proximas_a_caducar, 6)
+    try:
+        medicinas_page = paginator.page(page_number)
+    except PageNotAnInteger:
+        medicinas_page = paginator.page(1)
+    except EmptyPage:
+        medicinas_page = paginator.page(paginator.num_pages)
+
+    for med in medicinas_page:
         if med.fecha_caducidad:
             med.dias_restantes = (med.fecha_caducidad - hoy).days
         else:
             med.dias_restantes = None
 
-    cantidad_medicinas_proximas_a_caducar = medicinas_proximas_a_caducar.count()
-    cantidad_medicinas_filtradas = medicinas_filtradas.count()
+    cantidad_medicinas_proximas_a_caducar = paginator.count
 
     contexto = {
         'medicinas_caducadas': medicinas_caducadas,
         'cantidad_medicinas_proximas_a_caducar': cantidad_medicinas_proximas_a_caducar,
-        'cantidad_medicinas_filtradas': cantidad_medicinas_filtradas,
-        'medicinas_proximas_a_caducar': medicinas_filtradas,
-        'hoy': hoy,
-        'hoy2': hoy_str,
-        'query': query
+        'medicinas_proximas_a_caducar': medicinas_page,
+        'query': query,
+        'paginator': paginator,
+        'page_obj': medicinas_page,
+        'current_page': int(page_number),
+        'total_pages': paginator.num_pages,
     }
     return render(request, "caducidades.html", contexto)
-
-
 
 
 @manejo_errores

@@ -15,6 +15,7 @@
     padding: 10px;
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 20px;
 }
 
 .seccionador, .seccionador2{
@@ -113,7 +114,7 @@
 .tarjeta_info{
     width: 300px;
     border-radius: 10px;
-    height: 400px;
+    height: 380px;
     padding: 8px;
     text-align: center;
     margin: 2px;
@@ -181,3 +182,45 @@ p{
 .text_venceran2{
     color: rgb(156, 136, 18);
 }
+
+
+.contSuperiorListadoMedicinas{
+    display: inline;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+}
+
+.paginadorListadoMedicinas{
+    background-color: rgb(235, 249, 255);
+    border: 2px solid rgb(135, 226, 214);
+    border-radius: 10px;
+    padding: 5px 10px;
+    text-align: center;
+}
+
+.siguientePag, .anteriorPag{
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.siguientePag{
+    color: blueviolet;
+}
+.siguientePag:hover{
+    color: rgb(199, 131, 255);
+    transition-duration: 0.4s;
+}
+
+
+.anteriorPag{
+    color: rgb(255, 79, 35);
+}
+.anteriorPag:hover{
+    color: rgb(255, 155, 131);
+    transition-duration: 0.4s;
+}
+
+

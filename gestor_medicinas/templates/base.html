@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
 
-    <!--titulo de cabeza de la web (lo define la plantilla hija)-->
     {% block head %}
     <title>{% block title %}{% endblock %}</title>  
     {% endblock %}
@@ -18,7 +17,7 @@
     <header class="cabecera">
         <div class="cont_info1">
             <img src="../static/img/idenna_logo2.webp" alt="logo idenna" class="logo_idena">
-            <h1 class="titulo">Panel de Medicinas</h1>
+            <h1 class="titulo">Panel Farmacia</h1>
         </div>
 
         <nav class="navegacion_links">
@@ -42,7 +41,6 @@
         </nav>
     </header>
 
-    <!--Aqui se mostrara el contenido del cuerpo de las plantillas hijas-->
     {% block body %}
     {% endblock %}
 </body>
